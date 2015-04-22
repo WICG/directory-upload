@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml'>
+  <head>
+    <meta charset='utf-8'/>
+    <title>Directory Upload</title>
+    <!-- // <script src='http://w3.dev/2009/dap/ReSpec.js/js/respec.js' class='remove'></script> -->
+    <!-- <script src='../js/require.js' data-main='../js/profile-w3c-common' async class='remove'></script> -->
+    <!-- // <script src='../builds/respec-w3c-common.js' async class='remove'></script> -->
+    <!-- // <script src='respec-debug.js' async class='remove'></script> -->
+    <script src='http://www.w3.org/Tools/respec/respec-w3c-common' async class='remove'></script>
+    <!-- // <script src='http://darobin.github.com/respec/builds/respec-w3c-common.js' async class='remove'></script> -->
+    <script class='remove'>
+      var respecConfig = {
+              shortName:    "DirectoryUpload"
+          ,   specStatus:   "unofficial"
+          ,   editors:      [{ name: "Ali Alabbas", mailto: "alia@microsoft.com", company: "Microsoft", companyURL: "http://www.microsoft.com" },
+                             { name: "Israel Hilerio", mailto: "israelh@microsoft.com", company: "Microsoft", companyURL: "http://www.microsoft.com" },
+                             { name: "Adrian Bateman", mailto: "adrianba@microsoft.com", company: "Microsoft", companyURL: "http://www.microsoft.com" }]
+          ,   processVersion: 2005
+          ,   wg: "Web Applications Working Group"
+          ,   wgURI: "http://www.w3.org/2008/webapps/"
+        };
+    </script>
+  </head>
+  <body>
+    <section id='abstract'>
+      <p>
+        This spec aims to enable directory uploading by allowing a developer to read directory contents (files and sub-directories) asynchronously and be able to reconstruct the directory structure.
+      </p>
+    </section>
+    <section id='sotd'>
+      <p>
+        This spec is currently being proposed with the expectation that there may be changes.
+      </p>
+    </section>
+    <section>
+      <h2>Background</h2>
+      <p>Websites are currently able to provide functionality for uploading files by using <code class="hightlight">&lt;input type="file" multiple></code> and drag and drop. However, there currently is no standard solution to handle directories and cases that involve a mix of files and directories.</p>
+    </section>
+    <section>
+      <h2>Scenarios</h2>
+      <p>The following scenarios are in scope for this proposal:</p>
+      <ol>
+        <li>Users are able to select one or more directories using a file dialog</li>
+        <li>Users are able to select a combination of directories and files using a file dialog</li>
+        <li>Users are able to select one or more directories via drag and drop</li>
+        <li>Users are able to select a combination of directories and files via drag and drop</li>
+      </ol>
+      <p>To address scenario 1 and 2, the HTML5 input tag needs a new attribute that can allow a user to select a directory as well as files. In addition, the HTMLInputElement needs an attribute for retrieving the directory so that it can be traversed. For scenario 3 and 4, DataTransfer needs an attribute for retrieving a virtual root directory holding all the sub-directories and files dropped in so that it can be traversed. To enable these scenarios, a Directory interface needs to be defined allowing the following: retrieving a list of its contents, reporting its relative path, and reporting its name.</p>
+    </section>
+    <section>
+      <h2>APIs</h2>
+      <section>
+        <h2>Directory Interface</h2>
+        <p>More information about the Directory interface can be found in the <a href="http://w3c.github.io/filesystem-api/#idl-def-Directory">FileSystem API</a>.</p>
+        <dl class="idl" title="[Exposed=Window,Worker] partial interface Directory">
+          <dt>readonly attribute DOMString name</dt>
+          <dd>Returns the name of the directory.</dd>
+          <dt>readonly attribute DOMString path</dt>
+          <dd>Returns the directory's path relative to the root directory.</dd>
+          <dt>Promise&lt;(File or Directory)[]> listContents ()</dt>
+          <dd>Returns a Promise that resolves with an array of File and/or <a>Directory</a>. This is a snapshot of the <a>Directory</a>'s files and sub-directories. See <a href="http://w3c.github.io/filesystem-api/#widl-Directory-enumerate-Observable--File-or-Directory---DOMString-path">enumerate</a> in FileSystem API spec for more information.
+          <p class="issue">listContents() may not be the final name of the function and it is subject to change.</p></dd>
+        </dl>
+      </section>
+      <section>
+        <h2>File Input</h2>
+        <p>More information about the HTMLInputElement interface can be found in the <a href="http://www.w3.org/html/wg/drafts/html/CR/forms.html#the-input-element">HTML5 spec</a>.</p>
+        <dl class="idl" title="partial interface HTMLInputElement : HTMLElement">
+          <dt>attribute DOMString dir</dt>
+          <dd>Having the <code class="highlight">dir</code> attribute enables the directory picker. Also, it implicitly enables multiple file selection. The <code class="highlight">multiple</code> attribute would not be required when the <code class="highlight">dir</code> attribute is set.
+            <pre class="example highlight" title="HTML">
+              &lt;input type="file" id="fileInput" dir />
+                    &lt;!-- Supports being able to select multiple files and/or directories -->
+            </pre>
+          </dd>
+          <dt>readonly attribute Directory directory</dt>
+          <dd>Returns a read-only virtual root <a>Directory</a> where <a href="#widl-Directory-listContents-Promise--File-or-Directory"><code>listContents</code></a> returns the files and directories chosen.
+            <pre class="example highlight" title="JavaScript">
+              var input = document.getElementById('fileInput').directory;
+
+              input.listContents().then(function(filesAndDirs) {
+                  // iterate through each item
+                  // see example below for more details
+              });
+            </pre>
+          </dd>
+        </dl>
+        <section>
+          <h2>Form Submission</h2>
+          <p>When a form is submitted with <code class="highlight">enctype="multipart/form-data"</code> and a file input with the <code class="highlight">dir</code> attribute it must follow the following pattern in its request payload:</p>
+          <pre class="example highlight">
+------Boundary
+Content-Disposition: form-data; name="file"; filename="docs/1.txt"
+Content-Type: text/plain
+
+[DATA]
+------Boundary
+Content-Disposition: form-data; name="file"; filename="docs/path/2.txt"
+Content-Type: text/plain
+
+[DATA]
+------Boundary
+Content-Disposition: form-data; name="file"; filename="docs/path/to/3.txt"
+Content-Type: text/plain
+
+[DATA]
+------Boundary--
+          </pre>
+          <p class="note">
+            Directories that are empty will not be included in the request payload. This will make it backwards compatible with server scripts that only expect files.
+          </p>
+        </section>
+      </section>
+      <section>
+        <h2>Drag and Drop</h2>
+        <p>More information about the DataTransfer interface can be found in the <a href="http://www.w3.org/TR/2010/WD-html5-20101019/dnd.html#datatransfer">HTML5 spec</a>.</p>
+        <dl class="idl" title="partial interface DataTransfer">
+          <dt>readonly attribute Directory directory</dt>
+          <dd>Returns a read-only virtual root <a>Directory</a> where <a href="#widl-Directory-listContents-Promise--File-or-Directory"><code>listContents</code></a> returns the files and directories chosen.
+            <pre class="example highlight" title="JavaScript">
+              document.getElementById('dropDiv').addEventListener('drop', function (e) {
+                  e.stopPropagation();
+                  e.preventDefault();
+
+                  var uploadFile = function(file, path) {
+                      // handle file uploading
+                  };
+
+                  var traverse = function(dir) {
+                      dir.listContents().then(function(filesAndDirs) {
+                          // iterate through all enumerated items
+                          for (var i = 0; i < filesAndDirs.length; i++) {
+                              if (filesAndDirs[i] instanceof Directory) {
+                                  // this recursion enables deep traversal of directories
+                                  traverse(filesAndDirs[i]);
+                              } else {
+                                  uploadFile(filesAndDirs[i], dir.path);
+                              }
+                          }
+                      });
+                  };
+
+                  // begin by traversing the DataTransfer's read-only virtual directory
+                  // containing all files/directories dropped in
+                  traverse(e.dataTransfer.directory);
+              });
+            </pre>
+          </dd>
+        </dl>
+      </section>
+    </section>
+    <section>
+      <h2>Appendix</h2>
+      <section>
+        <h2>FAQ</h2>
+        <ol>
+          <li>Why did we use listContents() instead of enumerate()?</li>
+          <ul>
+            <li>We want to be able to save the enumerate() name for the future when we have Observables available so that we can have enumerate() return an Observable.</li>
+          </ul>
+          <li>Why are we returning Promise for listContents() instead of an Observable?</li>
+          <ul>
+            <li>The directory upload scenario does not require listening on changes to the file system, therefore Observables would not be warranted.</li>
+            <li>Observables, though undoubtedly advantageous in the enumeration scenario, are not well defined yet and it may take a long time before they are.</li>
+            <li>We want to build a solution using today's primitives (such as Promises) and then, if necessary, we can retrofit the API for future primitives (such as Observables) when they are available and well defined.</li>
+          </ul>
+          <li>Why are we returning an Array in the Promise?</li>
+          <ul>
+            <li>Provides a snapshot of the directories and files at the time that listContents() is called. Developers would expect this for directory upload.</li>
+            <li>An array allows iterating through the File and Directory objects.</li>
+          </ul>
+          <li>Why did we remove enumerateDeep() from the originally proposed Directory interface?</li>
+          <ul>
+            <li>It is not needed for the time being as recursively calling the listContents() function would fulfill the scenario that enumerateDeep() was meant to fulfill.</li>
+            <li>listContents() would provide a smaller result set compared to enumerateDeep().</li>
+          </ul>
+          <li>Why is it ok to remove the other methods from the originally proposed Directory interface?</li>
+          <ul>
+            <li>Since the focus is on read-only scenarios to enable directory uploading, only a subset of the APIs are needed.</li>
+            <li>The Directory interface will be extensible for the future when we need to address scenarios that involve writing.</li>
+          </ul>
+          <li>Why do we need the "name" attribute even though it would be empty for the virtual root directory?</li>
+          <ul>
+            <li>When introspecting directories that are inside of the virtual root directory, we would need to know the name of the directory so that we can reconstruct the path of the file relative to its position in the file tree.</li>
+          </ul>
+          <li>Why do we have a read-only virtual directory?</li>
+          <ul>
+            <li>A virtual directory that holds the collection of files/directories that are dropped or selected via a dialog would allow a developer to operate on the directory using the Directory interface which is extensible should we need to add any new methods/attributes to the Directory interface that we would like to use in the read-only case.</li>
+          </ul>
+        </ol>
+      </section>
+      <section>
+        <h2>Additional Thoughts</h2>
+          <p>Initial thoughts from Mozilla on their UI representation for a file input that can handle directory and file pickers can be found here: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=846931">https://bugzilla.mozilla.org/show_bug.cgi?id=846931</a>.<p>
+          <pre>So the UI would look something like:
+
++--------------------------------+
+|[Choose files][Choose directory]|
++--------------------------------+
+
+Once something is picked
+
++--------------------------------+
+|3 files attached             [x]|
++--------------------------------+
+
+If the X is clicked the UI goes back to the initial one. If the control is hovered/clicked we display
+
++--------------------------------+
+|3 files attached             [x]|
++--------------------------------+
+ |file_name.html            [x]|
+ |somePic.jpg               [x]|
+ |vacation_pic.jpg          [x]|
+ |                             |
+ |[Add files][Add directory]   |
+ +-----------------------------+</pre>
+            <p class="issue">There would need to be a programmatic way to show the directory picker rather than the file picker since the default click behavior is to show the file picker. An example would be to have chooseDirectory() as part of the HTMLInputElement. It would activate the directory picker if the dir attribute is set on the file input for Operating Systems that do not support a file/directory picker in the same dialog. See here for more information: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=846931#c13">https://bugzilla.mozilla.org/show_bug.cgi?id=846931#c13</a></p>
+      </section>
+    </section>
+  </body>
+</html>

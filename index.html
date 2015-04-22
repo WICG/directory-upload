@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Directory Upload Example</title>
+<style type="text/css">
+* {
+	box-sizing: border-box;
+}
+
+body {
+	font-family: Arial;
+	padding: 40px;
+	margin: 0;
+}
+
+h1 {
+	margin-top: 0;
+}
+
+h1, h2 {
+	color: #0576A1;
+}
+
+a {
+	text-decoration: none;
+	color: #0074D9;
+}
+
+a:hover {
+	color: #42A1F5;
+}
+
+#dropDiv {
+	width: 100%;
+	border: 1px solid #CCCCCC;
+	margin-top: 20px;
+	padding: 80px 20px;
+	text-align: center;
+	color: #CCCCCC;
+}
+
+#dropDiv.over {
+	border-color: #DE7E7E;
+	color: #DE7E7E;
+	background-color: #FFEDED;
+}
+
+pre.code {
+	background-color: #F9F9F9;
+	padding: 10px;
+	display: block;
+	display: none;
+	border: 1px solid #EBEBEB;
+}
+
+#console {
+	border: 1px solid #EBEBEB;
+	background-color: #F9F9F9;
+	color: #333333;
+	padding: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Directory Upload Demo</h1>
+<p>There are two ways we can upload files and directories. Either we use a file input with the "dir" attribute, or we use an element with a drop event listener. The proposal for this can be found <a href="proposal.html">here</a>.</p>
+
+<h2>1. File Input</h2>
+<input type="file" id="fileInput" dir />
+<div>
+<h4><a href="#" onclick="return toggleDisplay('code-fileinput');">Code Example</a></h4>
+<pre class="code" id="code-fileinput">
+&lt;input type="file" id="fileInput" dir />
+
+&lt;script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function(event) {
+	document.getElementById('fileInput').addEventListener('change', function() {
+		var uploadFile = function(file, path) {
+			console.log(path, file);
+			// handle file uploading
+		};
+
+		var traverse = function(dir) {
+			dir.listContents().then(function(filesAndDirs) {
+				// iterate through all enumerated items
+				for (var i = 0; i < filesAndDirs.length; i++) {
+					if (filesAndDirs[i] instanceof Directory) {
+						// this recursion enables deep traversal of directories
+						traverse(filesAndDirs[i]);
+					} else {
+						uploadFile(filesAndDirs[i], dir.path);
+					}
+				}
+			});
+		};
+
+		if (window.Directory) {
+			traverse(this.directory);
+		}
+	});
+});
+&lt;/script>
+</pre>
+</div>
+
+<h2>2. Drag &amp; Drop</h2>
+<div id="dropDiv">Drag &amp; drop your files here!</div>
+<div>
+<h4><a href="#" onclick="return toggleDisplay('code-draganddrop');">Code Example</a></h4>
+<pre class="code" id="code-draganddrop">
+&lt;div id="dropDiv">Drag &amp; drop your files here!&lt;/div>
+
+&lt;script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function(event) {
+	document.getElementById('dropDiv').addEventListener('drop', function (e) {
+		e.stopPropagation();
+		e.preventDefault();
+
+		var uploadFile = function(file, path) {
+			console.log(path, file);
+			// handle file uploading
+		};
+
+		var traverse = function(dir) {
+			dir.listContents().then(function(filesAndDirs) {
+				// iterate through all enumerated items
+				for (var i = 0; i < filesAndDirs.length; i++) {
+					if (filesAndDirs[i] instanceof Directory) {
+						// this recursion enables deep traversal of directories
+						traverse(filesAndDirs[i]);
+					} else {
+						uploadFile(filesAndDirs[i], dir.path);
+					}
+				}
+			});
+		};
+
+		// begin by traversing the DataTransfer's read-only virtual directory
+		// containing all files/directories dropped in
+		if (window.Directory) {
+			traverse(e.dataTransfer.directory);
+		}
+	});
+});
+&lt;/script>
+</pre>
+</div>
+
+<h3>Output</h3>
+<pre id="console"></pre>
+
+<script type="text/javascript" src="polyfill.js"></script>
+<script type="text/javascript">
+function toggleDisplay(id) {
+	var el = document.getElementById(id);
+
+	el.style.display = el.style.display === 'block' ? 'none' : 'block';
+
+	return false;
+}
+
+document.addEventListener('DOMContentLoaded', function(event) {
+	function clearCons() {
+		var cons = document.getElementById('console');
+		if (window.Directory) {
+			cons.innerHTML = 'Use one of the above methods to show files here...';
+		} else {
+			cons.innerHTML = 'Directory interface is not supported. If using the polyfill, it is only supported in Chrome 25+.';
+		}
+	}
+
+	clearCons();
+
+	function printToScreen() {
+		var cons = document.getElementById('console');
+
+		cons.innerHTML += '<br>';
+
+		for (var i = 0; i < arguments.length; i++) {
+			var arg = arguments[i];
+
+			cons.innerHTML += '<br>';
+
+			if (arg instanceof File) {
+				arg = 'file name: ' + arg.name + '; type: ' + arg.type;
+			}
+
+			cons.innerHTML += arg;
+		}
+	}
+
+	/** File Input **/
+	document.getElementById('fileInput').addEventListener('change', function() {
+		clearCons();
+
+		var uploadFile = function(file, path) {
+			printToScreen(path, file);
+			// handle file uploading
+		};
+
+		var traverse = function(dir) {
+			dir.listContents().then(function(filesAndDirs) {
+				// iterate through all enumerated items
+				for (var i = 0; i < filesAndDirs.length; i++) {
+					if (filesAndDirs[i] instanceof Directory) {
+						// this recursion enables deep traversal of directories
+						traverse(filesAndDirs[i]);
+					} else {
+						uploadFile(filesAndDirs[i], dir.path);
+					}
+				}
+			});
+		};
+
+		if (window.Directory) {
+			traverse(this.directory);
+		}
+	});
+
+	/** Drag and Drop **/
+	function dragHover(e) {
+		e.stopPropagation();
+		e.preventDefault();
+
+		if (e.type === 'dragover') {
+			e.target.className = 'over';
+		} else {
+			e.target.className = '';
+		}
+	}
+
+	document.getElementById('dropDiv').addEventListener('dragover', dragHover);
+	document.getElementById('dropDiv').addEventListener('dragleave', dragHover);
+
+	document.getElementById('dropDiv').addEventListener('drop', function (e) {
+		e.stopPropagation();
+		e.preventDefault();
+
+		clearCons();
+
+		e.target.className = '';
+
+		var uploadFile = function(file, path) {
+			printToScreen(path, file);
+			// handle file uploading
+		};
+
+		var traverse = function(dir) {
+			dir.listContents().then(function(filesAndDirs) {
+				// iterate through all enumerated items
+				for (var i = 0; i < filesAndDirs.length; i++) {
+					if (filesAndDirs[i] instanceof Directory) {
+						// this recursion enables deep traversal of directories
+						traverse(filesAndDirs[i]);
+					} else {
+						uploadFile(filesAndDirs[i], dir.path);
+					}
+				}
+			});
+		};
+
+		// begin by traversing the DataTransfer's read-only virtual directory
+		// containing all files/directories dropped in
+		if (window.Directory) {
+			traverse(e.dataTransfer.directory);
+		}
+	});
+});
+</script>
+</body>
+</html>
