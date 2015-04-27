@@ -1,34 +1,29 @@
 <!DOCTYPE html>
-<html xmlns='http://www.w3.org/1999/xhtml'>
+<html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta charset='utf-8'/>
+    <meta charset="utf-8" />
     <title>Directory Upload</title>
-    <!-- // <script src='http://w3.dev/2009/dap/ReSpec.js/js/respec.js' class='remove'></script> -->
-    <!-- <script src='../js/require.js' data-main='../js/profile-w3c-common' async class='remove'></script> -->
-    <!-- // <script src='../builds/respec-w3c-common.js' async class='remove'></script> -->
-    <!-- // <script src='respec-debug.js' async class='remove'></script> -->
-    <script src='http://www.w3.org/Tools/respec/respec-w3c-common' async class='remove'></script>
-    <!-- // <script src='http://darobin.github.com/respec/builds/respec-w3c-common.js' async class='remove'></script> -->
-    <script class='remove'>
+    <script src="//www.w3.org/Tools/respec/respec-w3c-common.js" async class="remove"></script>
+    <script class="remove">
       var respecConfig = {
-              shortName:    "DirectoryUpload"
-          ,   specStatus:   "unofficial"
-          ,   editors:      [{ name: "Ali Alabbas", mailto: "alia@microsoft.com", company: "Microsoft", companyURL: "http://www.microsoft.com" },
-                             { name: "Israel Hilerio", mailto: "israelh@microsoft.com", company: "Microsoft", companyURL: "http://www.microsoft.com" },
-                             { name: "Adrian Bateman", mailto: "adrianba@microsoft.com", company: "Microsoft", companyURL: "http://www.microsoft.com" }]
-          ,   processVersion: 2005
-          ,   wg: "Web Applications Working Group"
-          ,   wgURI: "http://www.w3.org/2008/webapps/"
-        };
+        shortName:      "DirectoryUpload",
+        specStatus:     "unofficial",
+        editors:        [{name: "Ali Alabbas", mailto: "alia@microsoft.com", company: "Microsoft", companyURL: "http://www.microsoft.com"},
+                         {name: "Israel Hilerio", mailto: "israelh@microsoft.com", company: "Microsoft", companyURL: "http://www.microsoft.com"},
+                         {name: "Adrian Bateman", mailto: "adrianba@microsoft.com", company: "Microsoft", companyURL: "http://www.microsoft.com"}],
+        processVersion: 2005,
+        wg:             "Web Applications Working Group",
+        wgURI:          "http://www.w3.org/2008/webapps/"
+      };
     </script>
   </head>
   <body>
-    <section id='abstract'>
+    <section id="abstract">
       <p>
         This spec aims to enable directory uploading by allowing a developer to read directory contents (files and sub-directories) asynchronously and be able to reconstruct the directory structure.
       </p>
     </section>
-    <section id='sotd'>
+    <section id="sotd">
       <p>
         This spec is currently being proposed with the expectation that there may be changes.
       </p>
@@ -58,8 +53,8 @@
           <dd>Returns the name of the directory.</dd>
           <dt>readonly attribute DOMString path</dt>
           <dd>Returns the directory's path relative to the root directory.</dd>
-          <dt>Promise&lt;(File or Directory)[]> listContents ()</dt>
-          <dd>Returns a Promise that resolves with an array of File and/or <a>Directory</a>. This is a snapshot of the <a>Directory</a>'s files and sub-directories. See <a href="http://w3c.github.io/filesystem-api/#widl-Directory-enumerate-Observable--File-or-Directory---DOMString-path">enumerate</a> in FileSystem API spec for more information.
+          <dt>Promise&lt;sequence&lt;(File or Directory)>?> listContents ()</dt>
+          <dd>If the Directory has files or sub-directories, a Promise is returned that resolves with a sequence of File and/or <a>Directory</a> which represent a snapshot of the <a>Directory</a>'s contents. If the <a>Directory</a> is empty, a Promise is returned that resolves with <code>null</code>. See <a href="http://w3c.github.io/filesystem-api/#widl-Directory-enumerate-Observable--File-or-Directory---DOMString-path">enumerate</a> in FileSystem API spec for more information.
           <p class="issue">listContents() may not be the final name of the function and it is subject to change.</p></dd>
         </dl>
       </section>
@@ -75,7 +70,7 @@
             </pre>
           </dd>
           <dt>readonly attribute Directory directory</dt>
-          <dd>Returns a read-only virtual root <a>Directory</a> where <a href="#widl-Directory-listContents-Promise--File-or-Directory"><code>listContents</code></a> returns the files and directories chosen.
+          <dd>Returns a read-only virtual root <a>Directory</a> where <a href="#widl-Directory-listContents-Promise-sequence--File-or-Directory"><code>listContents</code></a> returns the files and directories chosen.
             <pre class="example highlight" title="JavaScript">
               var input = document.getElementById('fileInput').directory;
 
@@ -117,7 +112,7 @@ Content-Type: text/plain
         <p>More information about the DataTransfer interface can be found in the <a href="http://www.w3.org/TR/2010/WD-html5-20101019/dnd.html#datatransfer">HTML5 spec</a>.</p>
         <dl class="idl" title="partial interface DataTransfer">
           <dt>readonly attribute Directory directory</dt>
-          <dd>Returns a read-only virtual root <a>Directory</a> where <a href="#widl-Directory-listContents-Promise--File-or-Directory"><code>listContents</code></a> returns the files and directories chosen.
+          <dd>Returns a read-only virtual root <a>Directory</a> where <a href="#widl-Directory-listContents-Promise-sequence--File-or-Directory"><code>listContents</code></a> returns the files and directories chosen.
             <pre class="example highlight" title="JavaScript">
               document.getElementById('dropDiv').addEventListener('drop', function (e) {
                   e.stopPropagation();
