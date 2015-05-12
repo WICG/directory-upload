@@ -62,10 +62,10 @@
         <h2>File Input</h2>
         <p>More information about the HTMLInputElement interface can be found in the <a href="http://www.w3.org/html/wg/drafts/html/CR/forms.html#the-input-element">HTML5 spec</a>.</p>
         <dl class="idl" title="partial interface HTMLInputElement : HTMLElement">
-          <dt>attribute DOMString dir</dt>
-          <dd>Having the <code class="highlight">dir</code> attribute enables the directory picker. Also, it implicitly enables multiple file selection. The <code class="highlight">multiple</code> attribute would not be required when the <code class="highlight">dir</code> attribute is set.
+          <dt>attribute DOMString directories</dt>
+          <dd>Having the <code class="highlight">directories</code> attribute enables the directory picker. Also, it implicitly enables multiple file selection. The <code class="highlight">multiple</code> attribute would not be required when the <code class="highlight">directories</code> attribute is set.
             <pre class="example highlight" title="HTML">
-              &lt;input type="file" id="fileInput" dir />
+              &lt;input type="file" id="fileInput" directories />
                     &lt;!-- Supports being able to select multiple files and/or directories -->
             </pre>
           </dd>
@@ -83,7 +83,7 @@
         </dl>
         <section>
           <h2>Form Submission</h2>
-          <p>When a form is submitted with <code class="highlight">enctype="multipart/form-data"</code> and a file input with the <code class="highlight">dir</code> attribute it must follow the following pattern in its request payload:</p>
+          <p>When a form is submitted with <code class="highlight">enctype="multipart/form-data"</code> and a file input with the <code class="highlight">directories</code> attribute it must follow the following pattern in its request payload:</p>
           <pre class="example highlight">
 ------Boundary
 Content-Disposition: form-data; name="file"; filename="docs/1.txt"
@@ -126,7 +126,7 @@ Content-Type: text/plain
                       dir.listContents().then(function(filesAndDirs) {
                           // iterate through all enumerated items
                           for (var i = 0; i < filesAndDirs.length; i++) {
-                              if (filesAndDirs[i] instanceof Directory) {
+                              if (typeof filesAndDirs[i].listContents === 'function') {
                                   // this recursion enables deep traversal of directories
                                   traverse(filesAndDirs[i]);
                               } else {
@@ -211,7 +211,7 @@ If the X is clicked the UI goes back to the initial one. If the control is hover
  |                             |
  |[Add files][Add directory]   |
  +-----------------------------+</pre>
-            <p class="issue">There would need to be a programmatic way to show the directory picker rather than the file picker since the default click behavior is to show the file picker. An example would be to have chooseDirectory() as part of the HTMLInputElement. It would activate the directory picker if the dir attribute is set on the file input for Operating Systems that do not support a file/directory picker in the same dialog. See here for more information: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=846931#c13">https://bugzilla.mozilla.org/show_bug.cgi?id=846931#c13</a></p>
+            <p class="issue">There would need to be a programmatic way to show the directory picker rather than the file picker since the default click behavior is to show the file picker. An example would be to have chooseDirectory() as part of the HTMLInputElement. It would activate the directory picker if the directories attribute is set on the file input for Operating Systems that do not support a file/directory picker in the same dialog. See here for more information: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=846931#c13">https://bugzilla.mozilla.org/show_bug.cgi?id=846931#c13</a></p>
       </section>
     </section>
   </body>

@@ -65,14 +65,14 @@ pre.code {
 <body>
 
 <h1>Directory Upload Demo</h1>
-<p>There are two ways we can upload files and directories. Either we use a file input with the "dir" attribute, or we use an element with a drop event listener. The proposal for this can be found <a href="proposal.html">here</a>.</p>
+<p>There are two ways we can upload files and directories. Either we use a file input with the "directories" attribute, or we use an element with a drop event listener. The proposal for this can be found <a href="proposal.html">here</a>.</p>
 
 <h2>1. File Input</h2>
-<input type="file" id="fileInput" dir />
+<input type="file" id="fileInput" directories />
 <div>
 <h4><a href="#" onclick="return toggleDisplay('code-fileinput');">Code Example</a></h4>
 <pre class="code" id="code-fileinput">
-&lt;input type="file" id="fileInput" dir />
+&lt;input type="file" id="fileInput" directories />
 
 &lt;script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function(event) {
@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 			dir.listContents().then(function(filesAndDirs) {
 				// iterate through all enumerated items
 				for (var i = 0; i < filesAndDirs.length; i++) {
-					if (filesAndDirs[i] instanceof Directory) {
+					if (typeof filesAndDirs[i].listContents === 'function') {
 						// this recursion enables deep traversal of directories
 						traverse(filesAndDirs[i]);
 					} else {
@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 			dir.listContents().then(function(filesAndDirs) {
 				// iterate through all enumerated items
 				for (var i = 0; i < filesAndDirs.length; i++) {
-					if (filesAndDirs[i] instanceof Directory) {
+					if (typeof filesAndDirs[i].listContents === 'function') {
 						// this recursion enables deep traversal of directories
 						traverse(filesAndDirs[i]);
 					} else {
@@ -204,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 			dir.listContents().then(function(filesAndDirs) {
 				// iterate through all enumerated items
 				for (var i = 0; i < filesAndDirs.length; i++) {
-					if (filesAndDirs[i] instanceof Directory) {
+					if (typeof filesAndDirs[i].listContents === 'function') {
 						// this recursion enables deep traversal of directories
 						traverse(filesAndDirs[i]);
 					} else {
@@ -251,7 +251,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 			dir.listContents().then(function(filesAndDirs) {
 				// iterate through all enumerated items
 				for (var i = 0; i < filesAndDirs.length; i++) {
-					if (filesAndDirs[i] instanceof Directory) {
+					if (typeof filesAndDirs[i].listContents === 'function') {
 						// this recursion enables deep traversal of directories
 						traverse(filesAndDirs[i]);
 					} else {

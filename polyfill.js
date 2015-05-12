@@ -9,7 +9,7 @@
 		return;
 	}
 
-	var directoryAttr = 'dir',
+	var directoryAttr = 'directories',
 		dirPropFileInput = 'directory',
 		dirPropDataTransfer = dirPropFileInput;
 
@@ -42,7 +42,7 @@
 						}, reject);
 					});
 				}
-			}
+			};
 
 			if (this.path === separator) {
 				var promises = [];
