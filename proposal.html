@@ -53,8 +53,8 @@
           <dd>Returns the name of the directory.</dd>
           <dt>readonly attribute DOMString path</dt>
           <dd>Returns the directory's path relative to the root directory.</dd>
-          <dt>Promise&lt;sequence&lt;(File or Directory)>?> listContents ()</dt>
-          <dd>If the Directory has files or sub-directories, a Promise is returned that resolves with a sequence of File and/or <a>Directory</a> which represent a snapshot of the <a>Directory</a>'s contents. If the <a>Directory</a> is empty, a Promise is returned that resolves with <code>null</code>. See <a href="http://w3c.github.io/filesystem-api/#widl-Directory-enumerate-Observable--File-or-Directory---DOMString-path">enumerate</a> in FileSystem API spec for more information.
+          <dt>Promise&lt;sequence&lt;(File or Directory)>> listContents ()</dt>
+          <dd>If the Directory has files or sub-directories, a Promise is returned that resolves with a <code>sequence</code> of <code>File</code> and/or <a>Directory</a> which represent a snapshot of the <a>Directory</a>'s contents. If the <a>Directory</a> is empty, a Promise is returned that resolves with an empty <code>sequence</code>. See <a href="http://w3c.github.io/filesystem-api/#widl-Directory-enumerate-Observable--File-or-Directory---DOMString-path">enumerate</a> in FileSystem API spec for more information.
           <p class="issue">listContents() may not be the final name of the function and it is subject to change.</p></dd>
         </dl>
       </section>
