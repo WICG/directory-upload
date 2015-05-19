@@ -8,9 +8,9 @@
       var respecConfig = {
         shortName:      "DirectoryUpload",
         specStatus:     "unofficial",
-        editors:        [{name: "Ali Alabbas", mailto: "alia@microsoft.com", company: "Microsoft", companyURL: "http://www.microsoft.com"},
-                         {name: "Israel Hilerio", mailto: "israelh@microsoft.com", company: "Microsoft", companyURL: "http://www.microsoft.com"},
-                         {name: "Adrian Bateman", mailto: "adrianba@microsoft.com", company: "Microsoft", companyURL: "http://www.microsoft.com"}],
+        editors:        [{name: "Ali Alabbas", company: "Microsoft"},
+                         {name: "Israel Hilerio", company: "Microsoft"},
+                         {name: "Adrian Bateman", company: "Microsoft"}],
         processVersion: 2005,
         wg:             "Web Applications Working Group",
         wgURI:          "http://www.w3.org/2008/webapps/"
@@ -53,37 +53,115 @@
           <dd>Returns the name of the directory.</dd>
           <dt>readonly attribute DOMString path</dt>
           <dd>Returns the directory's path relative to the root directory.</dd>
-          <dt>Promise&lt;sequence&lt;(File or Directory)>> listContents ()</dt>
-          <dd>If the Directory has files or sub-directories, a Promise is returned that resolves with a <code>sequence</code> of <code>File</code> and/or <a>Directory</a> which represent a snapshot of the <a>Directory</a>'s contents. If the <a>Directory</a> is empty, a Promise is returned that resolves with an empty <code>sequence</code>. See <a href="http://w3c.github.io/filesystem-api/#widl-Directory-enumerate-Observable--File-or-Directory---DOMString-path">enumerate</a> in FileSystem API spec for more information.
-          <p class="issue">listContents() may not be the final name of the function and it is subject to change.</p></dd>
+          <dt>Promise&lt;sequence&lt;(File or Directory)>> getContents ()</dt>
+          <dd>If the <a>Directory</a> has files or sub-directories, a <code>Promise</code> is returned that resolves with a <code>sequence</code> of <code>File</code> and/or <a>Directory</a> which represent a snapshot of the <a>Directory</a>'s contents. If the <a>Directory</a> is empty, a <code>Promise</code> is returned that resolves with an empty <code>sequence</code>. See <a href="http://w3c.github.io/filesystem-api/#widl-Directory-enumerate-Observable--File-or-Directory---DOMString-path">enumerate</a> in FileSystem API spec for more information.</dd>
         </dl>
       </section>
       <section>
         <h2>File Input</h2>
         <p>More information about the HTMLInputElement interface can be found in the <a href="http://www.w3.org/html/wg/drafts/html/CR/forms.html#the-input-element">HTML5 spec</a>.</p>
         <dl class="idl" title="partial interface HTMLInputElement : HTMLElement">
-          <dt>attribute DOMString directories</dt>
-          <dd>Having the <code class="highlight">directories</code> attribute enables the directory picker. Also, it implicitly enables multiple file selection. The <code class="highlight">multiple</code> attribute would not be required when the <code class="highlight">directories</code> attribute is set.
+          <dt>attribute DOMString directory</dt>
+          <dd>Having the <code class="highlight">directory</code> attribute enables the directory picker.
             <pre class="example highlight" title="HTML">
-              &lt;input type="file" id="fileInput" directories />
+              &lt;input type="file" id="fileInput" directory multiple />
                     &lt;!-- Supports being able to select multiple files and/or directories -->
             </pre>
+            <table class="parameters">
+              <thead>
+                <tr>
+                  <th><strong>Attribute(s)</strong></th>
+                  <th><strong>File</strong></th>
+                  <th><strong>Files</strong></th>
+                  <th><strong>Dir</strong></th>
+                  <th><strong>Dirs</strong></th>
+                  <th><strong>Sample UI</strong></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>&lt;input type=&quot;file&quot;&gt;</td>
+                  <td>&check;</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td>
+                    <pre>
++-------------------------------------+
+|                       | Choose file |
++-------------------------------------+
+</pre>
+                  </td>
+                </tr>
+                <tr>
+                  <td>&lt;input type=&quot;file&quot; <strong>multiple</strong>&gt;</td>
+                  <td>&check;</td>
+                  <td>&check;</td>
+                  <td></td>
+                  <td></td>
+                  <td>
+                    <pre>
++-------------------------------------+
+|                    | Choose file(s) |
++-------------------------------------+
+</pre>
+                  </td>
+                </tr>
+                <tr>
+                  <td>&lt;input type=&quot;file&quot; <strong>directory</strong>&gt;</td>
+                  <td></td>
+                  <td></td>
+                  <td>&check;</td>
+                  <td></td>
+                  <td>
+                    <pre>
++-------------------------------------+
+|                  | Choose directory |
++-------------------------------------+
+</pre>
+                  </td>
+                </tr>
+                <tr>
+                  <td>&lt;input type=&quot;file&quot; <strong>directory</strong> <strong>multiple</strong>&gt;</td>
+                  <td>&check;</td>
+                  <td>&check;</td>
+                  <td>&check;</td>
+                  <td>&check;</td>
+                  <td>
+                   <pre>
++-------------------------------------+
+|                    | Choose file(s) |
++-------------------------------------+
+</pre>
+                    or (if not supported, i.e. <a href="#widl-HTMLInputElement-isFilesAndDirectoriesSupported"><code>isFilesAndDirectoriesSupported</code></a> is false):
+                    <pre>
++-------------------------------------+
+|  Choose files  |  Choose directory  |
++-------------------------------------+
+</pre>
+                </tr>
+              </tbody>
+            </table>
           </dd>
-          <dt>readonly attribute Directory directory</dt>
-          <dd>Returns a read-only virtual root <a>Directory</a> where <a href="#widl-Directory-listContents-Promise-sequence--File-or-Directory"><code>listContents</code></a> returns the files and directories chosen.
+          <dt>readonly attribute Directory rootDirectory</dt>
+          <dd>Returns a read-only virtual root <a>Directory</a> where <a href="#widl-Directory-getContents-Promise-sequence--File-or-Directory"><code>getContents</code></a> returns the files and directories chosen.
             <pre class="example highlight" title="JavaScript">
-              var input = document.getElementById('fileInput').directory;
+              var input = document.getElementById('fileInput');
 
-              input.listContents().then(function(filesAndDirs) {
+              input.rootDirectory.getContents().then(function(filesAndDirs) {
                   // iterate through each item
                   // see example below for more details
               });
             </pre>
           </dd>
+          <dt>readonly attribute boolean isFilesAndDirectoriesSupported</dt>
+          <dd>True if the OS is capable of picking files and/or directories, false otherwise.</dd>
+          <dt>void chooseDirectory()</dt>
+          <dd>Triggers the directory picker if <a href="#widl-HTMLInputElement-isFilesAndDirectoriesSupported"><code>isFilesAndDirectoriesSupported</code></a> is false, otherwise triggers the default click behavior of the input element.</dd>
         </dl>
         <section>
           <h2>Form Submission</h2>
-          <p>When a form is submitted with <code class="highlight">enctype="multipart/form-data"</code> and a file input with the <code class="highlight">directories</code> attribute it must follow the following pattern in its request payload:</p>
+          <p>When a form is submitted with <code class="highlight">enctype="multipart/form-data"</code> and a file input with the <code class="highlight">directory</code> attribute it must follow the following pattern in its request payload:</p>
           <pre class="example highlight">
 ------Boundary
 Content-Disposition: form-data; name="file"; filename="docs/1.txt"
@@ -102,7 +180,7 @@ Content-Type: text/plain
 [DATA]
 ------Boundary--
           </pre>
-          <p class="note">
+          <p>
             Directories that are empty will not be included in the request payload. This will make it backwards compatible with server scripts that only expect files.
           </p>
         </section>
@@ -111,8 +189,8 @@ Content-Type: text/plain
         <h2>Drag and Drop</h2>
         <p>More information about the DataTransfer interface can be found in the <a href="http://www.w3.org/TR/2010/WD-html5-20101019/dnd.html#datatransfer">HTML5 spec</a>.</p>
         <dl class="idl" title="partial interface DataTransfer">
-          <dt>readonly attribute Directory directory</dt>
-          <dd>Returns a read-only virtual root <a>Directory</a> where <a href="#widl-Directory-listContents-Promise-sequence--File-or-Directory"><code>listContents</code></a> returns the files and directories chosen.
+          <dt>readonly attribute Directory rootDirectory</dt>
+          <dd>Returns a read-only virtual root <a>Directory</a> where <a href="#widl-Directory-getContents-Promise-sequence--File-or-Directory"><code>getContents</code></a> returns the files and directories chosen.
             <pre class="example highlight" title="JavaScript">
               document.getElementById('dropDiv').addEventListener('drop', function (e) {
                   e.stopPropagation();
@@ -123,10 +201,10 @@ Content-Type: text/plain
                   };
 
                   var traverse = function(dir) {
-                      dir.listContents().then(function(filesAndDirs) {
+                      dir.getContents().then(function(filesAndDirs) {
                           // iterate through all enumerated items
                           for (var i = 0; i < filesAndDirs.length; i++) {
-                              if (typeof filesAndDirs[i].listContents === 'function') {
+                              if (typeof filesAndDirs[i].getContents === 'function') {
                                   // this recursion enables deep traversal of directories
                                   traverse(filesAndDirs[i]);
                               } else {
@@ -138,7 +216,7 @@ Content-Type: text/plain
 
                   // begin by traversing the DataTransfer's read-only virtual directory
                   // containing all files/directories dropped in
-                  traverse(e.dataTransfer.directory);
+                  traverse(e.dataTransfer.rootDirectory);
               });
             </pre>
           </dd>
@@ -150,11 +228,11 @@ Content-Type: text/plain
       <section>
         <h2>FAQ</h2>
         <ol>
-          <li>Why did we use listContents() instead of enumerate()?</li>
+          <li>Why did we use getContents() instead of enumerate()?</li>
           <ul>
             <li>We want to be able to save the enumerate() name for the future when we have Observables available so that we can have enumerate() return an Observable.</li>
           </ul>
-          <li>Why are we returning Promise for listContents() instead of an Observable?</li>
+          <li>Why are we returning Promise for getContents() instead of an Observable?</li>
           <ul>
             <li>The directory upload scenario does not require listening on changes to the file system, therefore Observables would not be warranted.</li>
             <li>Observables, though undoubtedly advantageous in the enumeration scenario, are not well defined yet and it may take a long time before they are.</li>
@@ -162,56 +240,24 @@ Content-Type: text/plain
           </ul>
           <li>Why are we returning an Array in the Promise?</li>
           <ul>
-            <li>Provides a snapshot of the directories and files at the time that listContents() is called. Developers would expect this for directory upload.</li>
+            <li>Provides a snapshot of the directories and files at the time that getContents() is called. Developers would expect this for directory upload.</li>
             <li>An array allows iterating through the File and Directory objects.</li>
           </ul>
           <li>Why did we remove enumerateDeep() from the originally proposed Directory interface?</li>
           <ul>
-            <li>It is not needed for the time being as recursively calling the listContents() function would fulfill the scenario that enumerateDeep() was meant to fulfill.</li>
-            <li>listContents() would provide a smaller result set compared to enumerateDeep().</li>
+            <li>It is not needed for the time being as recursively calling the getContents() function would fulfill the scenario that enumerateDeep() was meant to fulfill.</li>
+            <li>getContents() would provide a smaller result set compared to enumerateDeep().</li>
           </ul>
           <li>Why is it ok to remove the other methods from the originally proposed Directory interface?</li>
           <ul>
             <li>Since the focus is on read-only scenarios to enable directory uploading, only a subset of the APIs are needed.</li>
             <li>The Directory interface will be extensible for the future when we need to address scenarios that involve writing.</li>
           </ul>
-          <li>Why do we need the "name" attribute even though it would be empty for the virtual root directory?</li>
-          <ul>
-            <li>When introspecting directories that are inside of the virtual root directory, we would need to know the name of the directory so that we can reconstruct the path of the file relative to its position in the file tree.</li>
-          </ul>
           <li>Why do we have a read-only virtual directory?</li>
           <ul>
             <li>A virtual directory that holds the collection of files/directories that are dropped or selected via a dialog would allow a developer to operate on the directory using the Directory interface which is extensible should we need to add any new methods/attributes to the Directory interface that we would like to use in the read-only case.</li>
           </ul>
         </ol>
-      </section>
-      <section>
-        <h2>Additional Thoughts</h2>
-          <p>Initial thoughts from Mozilla on their UI representation for a file input that can handle directory and file pickers can be found here: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=846931">https://bugzilla.mozilla.org/show_bug.cgi?id=846931</a>.<p>
-          <pre>So the UI would look something like:
-
-+--------------------------------+
-|[Choose files][Choose directory]|
-+--------------------------------+
-
-Once something is picked
-
-+--------------------------------+
-|3 files attached             [x]|
-+--------------------------------+
-
-If the X is clicked the UI goes back to the initial one. If the control is hovered/clicked we display
-
-+--------------------------------+
-|3 files attached             [x]|
-+--------------------------------+
- |file_name.html            [x]|
- |somePic.jpg               [x]|
- |vacation_pic.jpg          [x]|
- |                             |
- |[Add files][Add directory]   |
- +-----------------------------+</pre>
-            <p class="issue">There would need to be a programmatic way to show the directory picker rather than the file picker since the default click behavior is to show the file picker. An example would be to have chooseDirectory() as part of the HTMLInputElement. It would activate the directory picker if the directories attribute is set on the file input for Operating Systems that do not support a file/directory picker in the same dialog. See here for more information: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=846931#c13">https://bugzilla.mozilla.org/show_bug.cgi?id=846931#c13</a></p>
       </section>
     </section>
   </body>

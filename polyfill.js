@@ -9,9 +9,10 @@
 		return;
 	}
 
-	var directoryAttr = 'directories',
-		dirPropFileInput = 'directory',
-		dirPropDataTransfer = dirPropFileInput;
+	var directoryAttr = 'directory',
+		dirPropFileInput = 'rootDirectory',
+		dirPropDataTransfer = dirPropFileInput,
+		isSupportedProp = 'isFilesAndDirectoriesSupported';
 
 	var separator = '/';
 
@@ -22,7 +23,7 @@
 		this._items = false;
 	};
 
-	Directory.prototype.listContents = function() {
+	Directory.prototype.getContents = function() {
 		var that = this;
 
 		// from drag and drop
@@ -83,6 +84,9 @@
 
 	// set blank directory as default for all inputs
 	HTMLInputElement.prototype[dirPropFileInput] = new Directory();
+
+	// if OS is Mac, the combined directory and file picker is supported
+	HTMLInputElement.prototype[isSupportedProp] = navigator.appVersion.indexOf("Mac") != -1;
 
 	// expose Directory interface to window
 	window.Directory = Directory;
