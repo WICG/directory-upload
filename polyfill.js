@@ -86,7 +86,7 @@
 	HTMLInputElement.prototype[dirPropFileInput] = new Directory();
 
 	// if OS is Mac, the combined directory and file picker is supported
-	HTMLInputElement.prototype[isSupportedProp] = navigator.appVersion.indexOf("Mac") != -1;
+	HTMLInputElement.prototype[isSupportedProp] = navigator.appVersion.indexOf("Mac") !== -1;
 
 	// expose Directory interface to window
 	window.Directory = Directory;

@@ -65,7 +65,7 @@ pre.code {
 <body>
 
 <h1>Directory Upload Demo</h1>
-<p>There are two ways we can upload files and directories. Either we use a file input with the "directories" attribute, or we use an element with a drop event listener. The proposal for this can be found <a href="proposal.html">here</a>.</p>
+<p>There are two ways we can upload files and directories. Either we use a file input with the "directory" attribute, or we use an element with a drop event listener. The proposal for this can be found <a href="proposal.html">here</a>.</p>
 
 <h2>1. File Input</h2>
 <input type="file" id="fileInput" directory />
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 			});
 		};
 
-		if (window.Directory) {
+		if ('rootDirectory' in this) {
 			traverse(this.rootDirectory);
 		}
 	});
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
 		// begin by traversing the DataTransfer's read-only virtual directory
 		// containing all files/directories dropped in
-		if (window.Directory) {
+		if ('rootDirectory' in e.dataTransfer) {
 			traverse(e.dataTransfer.rootDirectory);
 		}
 	});
@@ -164,10 +164,10 @@ function toggleDisplay(id) {
 document.addEventListener('DOMContentLoaded', function(event) {
 	function clearCons() {
 		var cons = document.getElementById('console');
-		if (window.Directory) {
+		if ('rootDirectory' in document.getElementById('fileInput')) {
 			cons.innerHTML = 'Use one of the above methods to show files here...';
 		} else {
-			cons.innerHTML = 'Directory interface is not supported. If using the polyfill, it is only supported in Chrome 25+.';
+			cons.innerHTML = 'Directory upload is not supported. If using the polyfill, it is only supported in Chrome 25+.';
 		}
 	}
 
@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
 			cons.innerHTML += '<br>';
 
-			if (arg instanceof File) {
+			if (arg.constructor === File) {
 				arg = 'file name: ' + arg.name + '; type: ' + arg.type;
 			}
 
@@ -214,7 +214,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 			});
 		};
 
-		if (window.Directory) {
+		if ('rootDirectory' in this) {
 			traverse(this.rootDirectory);
 		}
 	});
@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
 		// begin by traversing the DataTransfer's read-only virtual directory
 		// containing all files/directories dropped in
-		if (window.Directory) {
+		if ('rootDirectory' in e.dataTransfer) {
 			traverse(e.dataTransfer.rootDirectory);
 		}
 	});
