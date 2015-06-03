@@ -69,24 +69,32 @@
             <pre class="example highlight" title="HTML">
               &lt;input type="file" id="fileInput" directory multiple />
                     &lt;!-- Supports being able to select multiple files and/or directories -->
-                    &lt;!-- Having the multiple attribute makes it so that older browsers allow -->
-                    &lt;!-- multiple files to be chosen since they do not recognize the directory attribute -->
+                    &lt;!-- Adding the multiple attribute is useful because older browsers would be able -->
+                    &lt;!-- to accept multiple files even if they do not recognize the directory attribute -->
             </pre>
             <p>If the OS supports a combined file and directory picker (i.e. <code><a href="#widl-HTMLInputElement-isFilesAndDirectoriesSupported">isFilesAndDirectoriesSupported</a> === true</code>) a file input with a single button that enables the combined picker is rendered:</p>
-            <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px 5px 5px 10px; width: 285px; height: 20px; line-height: 20px;">
-              1 file selected.
-              <div style="float: right; width: 132.5px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center; ">Choose file(s)...</div>
-            </div>
+            <figure>
+              <div style="border: 1px solid #999; color: #444; font-size: 14px; width: 285px; height: 20px; line-height: 20px; padding: 5px 5px 5px 10px;">
+                1 file selected.
+                <div style="float: right; width: 132.5px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center;">Choose file(s)...</div>
+              </div>
+              <figcaption>Clicking &quot;Choose file(s)&quot; activates combined file &amp; directory picker</figcaption>
+            </figure>
             <p>If it is not supported (i.e. <code><a href="#widl-HTMLInputElement-isFilesAndDirectoriesSupported">isFilesAndDirectoriesSupported</a> === false</code>) a file input that enables two separate pickers (file and directory) via two different buttons is rendered:</p>
-            <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px; width: 290px; height: 20px; line-height: 20px;">
-              <div style="float: left; width: 130px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center; ">Choose files...</div>
-              <div style="float: left; margin-left: 5px; width: 130px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center; ">Choose directory...</div>
-            </div>
-            <p><em>After a selection has been made:</em></p>
-            <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px 5px 5px 10px; width: 285px; height: 20px; line-height: 20px;">
-              2 files selected.
-              <div style="float: right; height: 12px; line-height: 12px; padding: 5px; font-weight: bold; font-size: 16px; color: #999">&times;</div>
-            </div>
+            <figure>
+              <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px; width: 290px; height: 20px; line-height: 20px;">
+                <div style="float: left; width: 130px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center;">Choose files...</div>
+                <div style="float: left; width: 130px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center; margin-left: 5px;">Choose directory...</div>
+              </div>
+              <figcaption>Default (no selection)</figcaption>
+            </figure>
+            <figure>
+              <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px 5px 5px 10px; width: 285px; height: 20px; line-height: 20px;">
+                2 files selected.
+                <div style="float: right; height: 13px; line-height: 13px; padding: 5px; font-weight: bold; font-size: 16px; color: #999;">&times;</div>
+              </div>
+              <figcaption>After a selection has been made; clearing the field will reset it to <a href="#fig-default-no-selection"></a></figcaption>
+            </figure>
             <p>The default click behavior of such a file input would trigger the file picker. To trigger the directory picker, call <a href="#widl-HTMLInputElement-chooseDirectory-void"><code>chooseDirectory</code></a> on the file input element.</p>
           </dd>
           <dt>readonly attribute Directory rootDirectory</dt>
