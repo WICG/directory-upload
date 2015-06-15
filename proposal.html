@@ -43,36 +43,39 @@
           <li>Users are able to select one or more directories via drag and drop</li>
           <li>Users are able to select a combination of directories and files via drag and drop</li>
         </ol>
-        <p>To address scenario 1 and 2, the HTML5 input tag needs a new attribute that can allow a user to select a directory as well as files. In addition, the HTMLInputElement needs an attribute for retrieving the directory so that it can be traversed. For scenario 3 and 4, DataTransfer needs an attribute for retrieving a virtual root directory holding all the sub-directories and files dropped in so that it can be traversed. To enable these scenarios, a Directory interface needs to be defined allowing the following: retrieving a list of its contents, reporting its relative path, and reporting its name.</p>
+        <p>To address scenario 1 and 2, the HTML5 input tag needs a new attribute that can allow a user to select a directory as well as files. In addition, the <code>HTMLInputElement</code> requires a method for retrieving all the files and directories chosen so they can be traversed. For scenario 3 and 4, <code>DataTransfer</code> needs a method for retrieving all the files and directories dropped in so they can be traversed. To enable these scenarios, a <a>Directory</a> interface needs to be defined allowing the following: retrieving a list of its contents, reporting its relative path, and reporting its name.</p>
       </section>
     </section>
     <section>
       <h2>APIs</h2>
       <section>
         <h2>Directory Interface</h2>
-        <p>More information about the Directory interface can be found in the <a href="http://w3c.github.io/filesystem-api/#idl-def-Directory">FileSystem API</a>.</p>
+        <p>More information about the <a>Directory</a> interface can be found in the <a href="http://w3c.github.io/filesystem-api/#idl-def-Directory">FileSystem API</a>.</p>
         <dl class="idl" title="[Exposed=Window,Worker] partial interface Directory">
           <dt>readonly attribute DOMString name</dt>
           <dd>The name of the directory.</dd>
           <dt>readonly attribute DOMString path</dt>
-          <dd>The directory's path relative to the root directory.</dd>
+          <dd>The directory's path relative to its root directory.</dd>
           <dt>Promise&lt;sequence&lt;(File or Directory)>> getContents ()</dt>
           <dd>If the <a>Directory</a> has files or sub-directories, a <code>Promise</code> is returned that resolves with a <code>sequence</code> of <code>File</code> and/or <a>Directory</a> which represent a snapshot of the <a>Directory</a>'s contents. If the <a>Directory</a> is empty, a <code>Promise</code> is returned that resolves with an empty <code>sequence</code>. See <a href="http://w3c.github.io/filesystem-api/#widl-Directory-enumerate-Observable--File-or-Directory---DOMString-path">enumerate</a> in FileSystem API spec for more information.</dd>
         </dl>
       </section>
       <section>
         <h2>File Input</h2>
-        <p>More information about the HTMLInputElement interface can be found in the <a href="http://www.w3.org/html/wg/drafts/html/CR/forms.html#the-input-element">HTML5 spec</a>.</p>
+        <p>More information about the <code>HTMLInputElement</code> interface can be found in the <a href="http://www.w3.org/html/wg/drafts/html/CR/forms.html#the-input-element">HTML5 spec</a>.</p>
         <dl class="idl" title="partial interface HTMLInputElement : HTMLElement">
           <dt>attribute boolean directory</dt>
-          <dd>Having the <a href="#widl-HTMLInputElement-directory"><code>directory</code></a> attribute enables the directory picker. Adding the <code>multiple</code> attribute does not change the behavior, however, it allows older browsers to make the file input accept multiple files instead of just one since they would not recognize the <a href="#widl-HTMLInputElement-directory"><code>directory</code></a> attribute.
+          <dd>If the input <code>type</code> is &quot;file&quot; and the <a href="#widl-HTMLInputElement-directory"><code>directory</code></a> attribute is set, the file input can accept directories in addition to files.
+          <div class="note">Adding the <code>multiple</code> attribute does not change the behavior, however, it allows older browsers to make the file input accept multiple files instead of just one since they would not recognize the <a href="#widl-HTMLInputElement-directory"><code>directory</code></a> attribute.</div>
+          If this attribute is set, <code>input.files</code> MUST return <code>null</code>.
+          <div class="note">Due to this, <a href="#widl-HTMLInputElement-getFiles-Promise-sequence--File-or-Directory"><code>getFiles</code></a> must be called to retrieve the chosen files and directories.</div>
             <pre class="example highlight" title="HTML">
               &lt;input type="file" id="fileInput" directory multiple />
                     &lt;!-- Supports being able to select multiple files and/or directories -->
                     &lt;!-- Adding the multiple attribute is useful because older browsers would be able -->
                     &lt;!-- to accept multiple files even if they do not recognize the directory attribute -->
             </pre>
-            <p>If the OS supports a combined file and directory picker (i.e. <code><a href="#widl-HTMLInputElement-isFilesAndDirectoriesSupported">isFilesAndDirectoriesSupported</a> === true</code>) a file input with a single button that enables the combined picker MUST be rendered:</p>
+            <p>If the host OS supports a combined file and directory picker (i.e. <code><a href="#widl-HTMLInputElement-isFilesAndDirectoriesSupported">isFilesAndDirectoriesSupported</a> === true</code>) a file input with a single button that enables the combined picker MUST be rendered:</p>
             <figure>
               <div style="border: 1px solid #999; color: #444; font-size: 14px; width: 285px; height: 20px; line-height: 20px; padding: 5px 5px 5px 10px;">
                 1 file selected.
@@ -97,21 +100,21 @@
             </figure>
             <p>The default click behavior of such a file input MUST trigger the file picker. Calling <a href="#widl-HTMLInputElement-chooseDirectory-void"><code>chooseDirectory</code></a> on the file input element MUST trigger the directory picker.</p>
           </dd>
-          <dt>readonly attribute Directory rootDirectory</dt>
-          <dd>A read-only virtual root <a>Directory</a> where <a href="#widl-Directory-getContents-Promise-sequence--File-or-Directory"><code>getContents</code></a> returns the files and directories chosen.
+          <dt>readonly attribute boolean isFilesAndDirectoriesSupported</dt>
+          <dd><code>true</code> if the host OS supports a single dialog capable of picking both files and directories simultaneously, <code>false</code> otherwise.</dd>
+          <dt>Promise&lt;sequence&lt;(File or Directory)>> getFiles ()</dt>
+          <dd>Returns a <code>Promise</code> that resolves with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen. If no files or directories were chosen, the <code>Promise</code> resolves with an empty <code>sequence</code>. If the input <code>type</code> is not &quot;file&quot;, nothing occurs.
             <pre class="example highlight" title="JavaScript">
               var input = document.getElementById('fileInput');
 
-              if ('rootDirectory' in input) {
-                  input.rootDirectory.getContents().then(function(filesAndDirs) {
+              if ('getFiles' in input) {
+                  input.getFiles().then(function(filesAndDirs) {
                       // iterate through each item
-                      // see example below for more details
+                      // see drag and drop example below for more details
                   });
               }
             </pre>
           </dd>
-          <dt>readonly attribute boolean isFilesAndDirectoriesSupported</dt>
-          <dd><code>true</code> if the OS is capable of picking files and/or directories, <code>false</code> otherwise.</dd>
           <dt>void chooseDirectory()</dt>
           <dd>Triggers the directory picker if <code><a href="#widl-HTMLInputElement-isFilesAndDirectoriesSupported">isFilesAndDirectoriesSupported</a> === false</code>, otherwise triggers the default click behavior of the input element. In either case, if the input <code>type</code> is not &quot;file&quot;, nothing occurs.</dd>
         </dl>
@@ -144,10 +147,11 @@ Content-Type: text/plain
       </section>
       <section>
         <h2>Drag and Drop</h2>
-        <p>More information about the DataTransfer interface can be found in the <a href="http://www.w3.org/TR/2010/WD-html5-20101019/dnd.html#datatransfer">HTML5 spec</a>.</p>
+        <p>More information about the <code>DataTransfer</code> interface can be found in the <a href="http://www.w3.org/TR/2010/WD-html5-20101019/dnd.html#datatransfer">HTML5 spec</a>.</p>
+        <p><code>DataTransfer</code>'s <code>files</code> attribute MUST continue to work with no changes to its behavior.</p>
         <dl class="idl" title="partial interface DataTransfer">
-          <dt>readonly attribute Directory rootDirectory</dt>
-          <dd>A read-only virtual root <a>Directory</a> where <a href="#widl-Directory-getContents-Promise-sequence--File-or-Directory"><code>getContents</code></a> returns the files and directories chosen.
+          <dt>Promise&lt;sequence&lt;(File or Directory)>> getFiles ()</dt>
+          <dd>Returns a <code>Promise</code> that resolves with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen. If no files or directories were chosen, the <code>Promise</code> resolves with an empty <code>sequence</code>.
             <pre class="example highlight" title="JavaScript">
               document.getElementById('dropDiv').addEventListener('drop', function(e) {
                   e.stopPropagation();
@@ -157,24 +161,27 @@ Content-Type: text/plain
                       // handle file uploading
                   };
 
-                  var traverse = function(dir) {
-                      dir.getContents().then(function(filesAndDirs) {
-                          // iterate through all enumerated items
-                          for (var i = 0; i < filesAndDirs.length; i++) {
-                              if (typeof filesAndDirs[i].getContents === 'function') {
-                                  // this recursion enables deep traversal of directories
-                                  traverse(filesAndDirs[i]);
-                              } else {
-                                  uploadFile(filesAndDirs[i], dir.path);
-                              }
+                  var iterateFilesAndDirs = function(filesAndDirs, path) {
+                      for (var i = 0; i < filesAndDirs.length; i++) {
+                          if (typeof filesAndDirs[i].getContents === 'function') {
+                              var path = filesAndDirs[i].path;
+
+                              // this recursion enables deep traversal of directories
+                              filesAndDirs[i].getContents().then(function(subFilesAndDirs) {
+                                  // iterate through files and directories in sub-directory
+                                  iterateFilesAndDirs(subFilesAndDirs, path);
+                              });
+                          } else {
+                              uploadFile(filesAndDirs[i], path);
                           }
-                      });
+                      }
                   };
 
-                  // begin by traversing the DataTransfer's read-only virtual directory
-                  // containing all files/directories dropped in
-                  if ('rootDirectory' in e.dataTransfer) {
-                      traverse(e.dataTransfer.rootDirectory);
+                  // begin by traversing the chosen files and directories
+                  if ('getFiles' in e.dataTransfer) {
+                      e.dataTransfer.getFiles().then(function(filesAndDirs) {
+                          iterateFilesAndDirs(filesAndDirs, '/');
+                      });
                   }
               });
             </pre>
@@ -211,10 +218,6 @@ Content-Type: text/plain
           <ul>
             <li>Since the focus is on read-only scenarios to enable directory uploading, only a subset of the APIs are needed.</li>
             <li>The Directory interface will be extensible for the future when we need to address scenarios that involve writing.</li>
-          </ul>
-          <li>Why do we have a read-only virtual directory?</li>
-          <ul>
-            <li>A virtual directory that holds the collection of files/directories that are dropped or selected via a dialog would allow a developer to operate on the directory using the Directory interface which is extensible should we need to add any new methods/attributes to the Directory interface that we would like to use in the read-only case.</li>
           </ul>
         </ol>
       </section>

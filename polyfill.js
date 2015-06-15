@@ -10,8 +10,7 @@
 	}
 
 	var directoryAttr = 'directory',
-		dirPropFileInput = 'rootDirectory',
-		dirPropDataTransfer = dirPropFileInput,
+		getFilesMethod = 'getFiles',
 		isSupportedProp = 'isFilesAndDirectoriesSupported';
 
 	var separator = '/';
@@ -82,11 +81,15 @@
 		}
 	};
 
-	// set blank directory as default for all inputs
-	HTMLInputElement.prototype[dirPropFileInput] = new Directory();
+	// set blank as default for all inputs
+	HTMLInputElement.prototype[getFilesMethod] = function() {
+		return Promise.resolve([]);
+	};
 
 	// if OS is Mac, the combined directory and file picker is supported
 	HTMLInputElement.prototype[isSupportedProp] = navigator.appVersion.indexOf("Mac") !== -1;
+
+	HTMLInputElement.prototype[directoryAttr] = undefined;
 
 	// expose Directory interface to window
 	window.Directory = Directory;
@@ -117,11 +120,13 @@
 		for (var i = 0; i < nodes.length; i++) {
 			var node = nodes[i];
 
-			if (node.tagName === 'INPUT' && node.type === 'file' && node.hasAttribute(directoryAttr)) {
-				node.setAttribute('webkitdirectory', '');
+			if (node.tagName === 'INPUT' && node.type === 'file') {
+				if (node.hasAttribute(directoryAttr)) {
+					node.setAttribute('webkitdirectory', '');
+				}
 
 				node.addEventListener('change', function() {
-					this[dirPropFileInput] = new Directory();
+					var dir = new Directory();
 
 					var files = this.files;
 
@@ -130,8 +135,12 @@
 						var path = file.webkitRelativePath;
 						var fullPath = path.substring(0, path.lastIndexOf(separator));
 
-						recurse(this[dirPropFileInput], path, fullPath, file);
+						recurse(dir, path, fullPath, file);
 					}
+
+					this[getFilesMethod] = function() {
+						return dir.getContents();
+					};
 				});
 			}
 		}
@@ -159,6 +168,10 @@
 	// keep a reference to the original method
 	var _addEventListener = Element.prototype.addEventListener;
 
+	DataTransfer.prototype[getFilesMethod] = function() {
+		return Promise.resolve([]);
+	};
+
 	Element.prototype.addEventListener = function(type, listener, useCapture) {
 		if (type === 'drop') {
 			var _listener = listener;
@@ -167,7 +180,9 @@
 				var dir = new Directory();
 				dir._items = e.dataTransfer.items;
 
-				e.dataTransfer[dirPropDataTransfer] = dir;
+				e.dataTransfer[getFilesMethod] = function() {
+					return dir.getContents();
+				};
 
 				_listener(e);
 			};

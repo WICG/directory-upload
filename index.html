@@ -68,7 +68,7 @@ pre.code {
 <p>To enable directory upload, certain new APIs are needed which are outlined in the <a href="proposal.html">directory upload spec proposal</a>. There are two ways we can upload files and directories: a file input with the &quot;directory&quot; attribute, or an element with a drop event listener. Below are examples of these methods in action using the new APIs (the polyfill only works in Chrome).</p>
 
 <h2>1. File Input</h2>
-<input type="file" id="fileInput" directory />
+<input type="file" id="fileInput" directory multiple />
 <div>
 <h4><a href="#" onclick="return toggleDisplay('code-fileinput');">Code Example</a></h4>
 <pre class="code" id="code-fileinput">
@@ -82,22 +82,27 @@ document.addEventListener('DOMContentLoaded', function(event) {
 			// handle file uploading
 		};
 
-		var traverse = function(dir) {
-			dir.getContents().then(function(filesAndDirs) {
-				// iterate through all enumerated items
-				for (var i = 0; i < filesAndDirs.length; i++) {
-					if (typeof filesAndDirs[i].getContents === 'function') {
-						// this recursion enables deep traversal of directories
-						traverse(filesAndDirs[i]);
-					} else {
-						uploadFile(filesAndDirs[i], dir.path);
-					}
+		var iterateFilesAndDirs = function(filesAndDirs, path) {
+			for (var i = 0; i < filesAndDirs.length; i++) {
+				if (typeof filesAndDirs[i].getContents === 'function') {
+					var path = filesAndDirs[i].path;
+
+					// this recursion enables deep traversal of directories
+					filesAndDirs[i].getContents().then(function(subFilesAndDirs) {
+						// iterate through files and directories in sub-directory
+						iterateFilesAndDirs(subFilesAndDirs, path);
+					});
+				} else {
+					uploadFile(filesAndDirs[i], path);
 				}
-			});
+			}
 		};
 
-		if ('rootDirectory' in this) {
-			traverse(this.rootDirectory);
+		// begin by traversing the chosen files and directories
+		if ('getFiles' in this) {
+			this.getFiles().then(function(filesAndDirs) {
+				iterateFilesAndDirs(filesAndDirs, '/');
+			});
 		}
 	});
 });
@@ -123,24 +128,27 @@ document.addEventListener('DOMContentLoaded', function(event) {
 			// handle file uploading
 		};
 
-		var traverse = function(dir) {
-			dir.getContents().then(function(filesAndDirs) {
-				// iterate through all enumerated items
-				for (var i = 0; i < filesAndDirs.length; i++) {
-					if (typeof filesAndDirs[i].getContents === 'function') {
-						// this recursion enables deep traversal of directories
-						traverse(filesAndDirs[i]);
-					} else {
-						uploadFile(filesAndDirs[i], dir.path);
-					}
+		var iterateFilesAndDirs = function(filesAndDirs, path) {
+			for (var i = 0; i < filesAndDirs.length; i++) {
+				if (typeof filesAndDirs[i].getContents === 'function') {
+					var path = filesAndDirs[i].path;
+
+					// this recursion enables deep traversal of directories
+					filesAndDirs[i].getContents().then(function(subFilesAndDirs) {
+						// iterate through files and directories in sub-directory
+						iterateFilesAndDirs(subFilesAndDirs, path);
+					});
+				} else {
+					uploadFile(filesAndDirs[i], path);
 				}
-			});
+			}
 		};
 
-		// begin by traversing the DataTransfer's read-only virtual directory
-		// containing all files/directories dropped in
-		if ('rootDirectory' in e.dataTransfer) {
-			traverse(e.dataTransfer.rootDirectory);
+		// begin by traversing the chosen files and directories
+		if ('getFiles' in e.dataTransfer) {
+			e.dataTransfer.getFiles().then(function(filesAndDirs) {
+				iterateFilesAndDirs(filesAndDirs, '/');
+			});
 		}
 	});
 });
@@ -164,7 +172,7 @@ function toggleDisplay(id) {
 document.addEventListener('DOMContentLoaded', function(event) {
 	function clearCons() {
 		var cons = document.getElementById('console');
-		if ('rootDirectory' in document.getElementById('fileInput')) {
+		if ('directory' in document.getElementById('fileInput')) {
 			cons.innerHTML = 'Use one of the above methods to show files here...';
 		} else {
 			cons.innerHTML = 'Directory upload is not supported. If using the polyfill, it is only supported in Chrome 25+.';
@@ -200,22 +208,27 @@ document.addEventListener('DOMContentLoaded', function(event) {
 			// handle file uploading
 		};
 
-		var traverse = function(dir) {
-			dir.getContents().then(function(filesAndDirs) {
-				// iterate through all enumerated items
-				for (var i = 0; i < filesAndDirs.length; i++) {
-					if (typeof filesAndDirs[i].getContents === 'function') {
-						// this recursion enables deep traversal of directories
-						traverse(filesAndDirs[i]);
-					} else {
-						uploadFile(filesAndDirs[i], dir.path);
-					}
+		var iterateFilesAndDirs = function(filesAndDirs, path) {
+			for (var i = 0; i < filesAndDirs.length; i++) {
+				if (typeof filesAndDirs[i].getContents === 'function') {
+					var path = filesAndDirs[i].path;
+
+					// this recursion enables deep traversal of directories
+					filesAndDirs[i].getContents().then(function(subFilesAndDirs) {
+						// iterate through files and directories in sub-directory
+						iterateFilesAndDirs(subFilesAndDirs, path);
+					});
+				} else {
+					uploadFile(filesAndDirs[i], path);
 				}
-			});
+			}
 		};
 
-		if ('rootDirectory' in this) {
-			traverse(this.rootDirectory);
+		// begin by traversing the chosen files and directories
+		if ('getFiles' in this) {
+			this.getFiles().then(function(filesAndDirs) {
+				iterateFilesAndDirs(filesAndDirs, '/');
+			});
 		}
 	});
 
@@ -247,24 +260,27 @@ document.addEventListener('DOMContentLoaded', function(event) {
 			// handle file uploading
 		};
 
-		var traverse = function(dir) {
-			dir.getContents().then(function(filesAndDirs) {
-				// iterate through all enumerated items
-				for (var i = 0; i < filesAndDirs.length; i++) {
-					if (typeof filesAndDirs[i].getContents === 'function') {
-						// this recursion enables deep traversal of directories
-						traverse(filesAndDirs[i]);
-					} else {
-						uploadFile(filesAndDirs[i], dir.path);
-					}
+		var iterateFilesAndDirs = function(filesAndDirs, path) {
+			for (var i = 0; i < filesAndDirs.length; i++) {
+				if (typeof filesAndDirs[i].getContents === 'function') {
+					var path = filesAndDirs[i].path;
+
+					// this recursion enables deep traversal of directories
+					filesAndDirs[i].getContents().then(function(subFilesAndDirs) {
+						// iterate through files and directories in sub-directory
+						iterateFilesAndDirs(subFilesAndDirs, path);
+					});
+				} else {
+					uploadFile(filesAndDirs[i], path);
 				}
-			});
+			}
 		};
 
-		// begin by traversing the DataTransfer's read-only virtual directory
-		// containing all files/directories dropped in
-		if ('rootDirectory' in e.dataTransfer) {
-			traverse(e.dataTransfer.rootDirectory);
+		// begin by traversing the chosen files and directories
+		if ('getFiles' in e.dataTransfer) {
+			e.dataTransfer.getFiles().then(function(filesAndDirs) {
+				iterateFilesAndDirs(filesAndDirs, '/');
+			});
 		}
 	});
 });
