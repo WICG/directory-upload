@@ -84,11 +84,11 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
 		var iterateFilesAndDirs = function(filesAndDirs, path) {
 			for (var i = 0; i < filesAndDirs.length; i++) {
-				if (typeof filesAndDirs[i].getContents === 'function') {
+				if (typeof filesAndDirs[i].getFilesAndDirectories === 'function') {
 					var path = filesAndDirs[i].path;
 
 					// this recursion enables deep traversal of directories
-					filesAndDirs[i].getContents().then(function(subFilesAndDirs) {
+					filesAndDirs[i].getFilesAndDirectories().then(function(subFilesAndDirs) {
 						// iterate through files and directories in sub-directory
 						iterateFilesAndDirs(subFilesAndDirs, path);
 					});
@@ -99,8 +99,8 @@ document.addEventListener('DOMContentLoaded', function(event) {
 		};
 
 		// begin by traversing the chosen files and directories
-		if ('getFiles' in this) {
-			this.getFiles().then(function(filesAndDirs) {
+		if ('getFilesAndDirectories' in this) {
+			this.getFilesAndDirectories().then(function(filesAndDirs) {
 				iterateFilesAndDirs(filesAndDirs, '/');
 			});
 		}
@@ -130,11 +130,11 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
 		var iterateFilesAndDirs = function(filesAndDirs, path) {
 			for (var i = 0; i < filesAndDirs.length; i++) {
-				if (typeof filesAndDirs[i].getContents === 'function') {
+				if (typeof filesAndDirs[i].getFilesAndDirectories === 'function') {
 					var path = filesAndDirs[i].path;
 
 					// this recursion enables deep traversal of directories
-					filesAndDirs[i].getContents().then(function(subFilesAndDirs) {
+					filesAndDirs[i].getFilesAndDirectories().then(function(subFilesAndDirs) {
 						// iterate through files and directories in sub-directory
 						iterateFilesAndDirs(subFilesAndDirs, path);
 					});
@@ -145,8 +145,8 @@ document.addEventListener('DOMContentLoaded', function(event) {
 		};
 
 		// begin by traversing the chosen files and directories
-		if ('getFiles' in e.dataTransfer) {
-			e.dataTransfer.getFiles().then(function(filesAndDirs) {
+		if ('getFilesAndDirectories' in e.dataTransfer) {
+			e.dataTransfer.getFilesAndDirectories().then(function(filesAndDirs) {
 				iterateFilesAndDirs(filesAndDirs, '/');
 			});
 		}
@@ -210,11 +210,11 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
 		var iterateFilesAndDirs = function(filesAndDirs, path) {
 			for (var i = 0; i < filesAndDirs.length; i++) {
-				if (typeof filesAndDirs[i].getContents === 'function') {
+				if (typeof filesAndDirs[i].getFilesAndDirectories === 'function') {
 					var path = filesAndDirs[i].path;
 
 					// this recursion enables deep traversal of directories
-					filesAndDirs[i].getContents().then(function(subFilesAndDirs) {
+					filesAndDirs[i].getFilesAndDirectories().then(function(subFilesAndDirs) {
 						// iterate through files and directories in sub-directory
 						iterateFilesAndDirs(subFilesAndDirs, path);
 					});
@@ -225,8 +225,8 @@ document.addEventListener('DOMContentLoaded', function(event) {
 		};
 
 		// begin by traversing the chosen files and directories
-		if ('getFiles' in this) {
-			this.getFiles().then(function(filesAndDirs) {
+		if ('getFilesAndDirectories' in this) {
+			this.getFilesAndDirectories().then(function(filesAndDirs) {
 				iterateFilesAndDirs(filesAndDirs, '/');
 			});
 		}
@@ -262,11 +262,11 @@ document.addEventListener('DOMContentLoaded', function(event) {
 
 		var iterateFilesAndDirs = function(filesAndDirs, path) {
 			for (var i = 0; i < filesAndDirs.length; i++) {
-				if (typeof filesAndDirs[i].getContents === 'function') {
+				if (typeof filesAndDirs[i].getFilesAndDirectories === 'function') {
 					var path = filesAndDirs[i].path;
 
 					// this recursion enables deep traversal of directories
-					filesAndDirs[i].getContents().then(function(subFilesAndDirs) {
+					filesAndDirs[i].getFilesAndDirectories().then(function(subFilesAndDirs) {
 						// iterate through files and directories in sub-directory
 						iterateFilesAndDirs(subFilesAndDirs, path);
 					});
@@ -277,8 +277,8 @@ document.addEventListener('DOMContentLoaded', function(event) {
 		};
 
 		// begin by traversing the chosen files and directories
-		if ('getFiles' in e.dataTransfer) {
-			e.dataTransfer.getFiles().then(function(filesAndDirs) {
+		if ('getFilesAndDirectories' in e.dataTransfer) {
+			e.dataTransfer.getFilesAndDirectories().then(function(filesAndDirs) {
 				iterateFilesAndDirs(filesAndDirs, '/');
 			});
 		}

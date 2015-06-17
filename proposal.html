@@ -56,7 +56,7 @@
           <dd>The name of the directory.</dd>
           <dt>readonly attribute DOMString path</dt>
           <dd>The directory's path relative to its root directory.</dd>
-          <dt>Promise&lt;sequence&lt;(File or Directory)>> getContents ()</dt>
+          <dt>Promise&lt;sequence&lt;(File or Directory)>> getFilesAndDirectories ()</dt>
           <dd>If the <a>Directory</a> has files or sub-directories, a <code>Promise</code> is returned that resolves with a <code>sequence</code> of <code>File</code> and/or <a>Directory</a> which represent a snapshot of the <a>Directory</a>'s contents. If the <a>Directory</a> is empty, a <code>Promise</code> is returned that resolves with an empty <code>sequence</code>. See <a href="http://w3c.github.io/filesystem-api/#widl-Directory-enumerate-Observable--File-or-Directory---DOMString-path">enumerate</a> in FileSystem API spec for more information.</dd>
         </dl>
       </section>
@@ -68,7 +68,7 @@
           <dd>If the input <code>type</code> is &quot;file&quot; and the <a href="#widl-HTMLInputElement-directory"><code>directory</code></a> attribute is set, the file input can accept directories in addition to files.
           <div class="note">Adding the <code>multiple</code> attribute does not change the behavior, however, it allows older browsers to make the file input accept multiple files instead of just one since they would not recognize the <a href="#widl-HTMLInputElement-directory"><code>directory</code></a> attribute.</div>
           If this attribute is set, <code>input.files</code> MUST return <code>null</code>.
-          <div class="note">Due to this, <a href="#widl-HTMLInputElement-getFiles-Promise-sequence--File-or-Directory"><code>getFiles</code></a> must be called to retrieve the chosen files and directories.</div>
+          <div class="note">Due to this, <a href="#widl-HTMLInputElement-getFilesAndDirectories-Promise-sequence--File-or-Directory"><code>getFilesAndDirectories</code></a> must be called to retrieve the chosen files and directories.</div>
             <pre class="example highlight" title="HTML">
               &lt;input type="file" id="fileInput" directory multiple />
                     &lt;!-- Supports being able to select multiple files and/or directories -->
@@ -102,13 +102,13 @@
           </dd>
           <dt>readonly attribute boolean isFilesAndDirectoriesSupported</dt>
           <dd><code>true</code> if the host OS supports a single dialog capable of picking both files and directories simultaneously, <code>false</code> otherwise.</dd>
-          <dt>Promise&lt;sequence&lt;(File or Directory)>> getFiles ()</dt>
+          <dt>Promise&lt;sequence&lt;(File or Directory)>> getFilesAndDirectories ()</dt>
           <dd>Returns a <code>Promise</code> that resolves with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen. If no files or directories were chosen, the <code>Promise</code> resolves with an empty <code>sequence</code>. If the input <code>type</code> is not &quot;file&quot;, nothing occurs.
             <pre class="example highlight" title="JavaScript">
               var input = document.getElementById('fileInput');
 
-              if ('getFiles' in input) {
-                  input.getFiles().then(function(filesAndDirs) {
+              if ('getFilesAndDirectories' in input) {
+                  input.getFilesAndDirectories().then(function(filesAndDirs) {
                       // iterate through each item
                       // see drag and drop example below for more details
                   });
@@ -150,7 +150,7 @@ Content-Type: text/plain
         <p>More information about the <code>DataTransfer</code> interface can be found in the <a href="http://www.w3.org/TR/2010/WD-html5-20101019/dnd.html#datatransfer">HTML5 spec</a>.</p>
         <p><code>DataTransfer</code>'s <code>files</code> attribute MUST continue to work with no changes to its behavior.</p>
         <dl class="idl" title="partial interface DataTransfer">
-          <dt>Promise&lt;sequence&lt;(File or Directory)>> getFiles ()</dt>
+          <dt>Promise&lt;sequence&lt;(File or Directory)>> getFilesAndDirectories ()</dt>
           <dd>Returns a <code>Promise</code> that resolves with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen. If no files or directories were chosen, the <code>Promise</code> resolves with an empty <code>sequence</code>.
             <pre class="example highlight" title="JavaScript">
               document.getElementById('dropDiv').addEventListener('drop', function(e) {
@@ -163,11 +163,11 @@ Content-Type: text/plain
 
                   var iterateFilesAndDirs = function(filesAndDirs, path) {
                       for (var i = 0; i < filesAndDirs.length; i++) {
-                          if (typeof filesAndDirs[i].getContents === 'function') {
+                          if (typeof filesAndDirs[i].getFilesAndDirectories === 'function') {
                               var path = filesAndDirs[i].path;
 
                               // this recursion enables deep traversal of directories
-                              filesAndDirs[i].getContents().then(function(subFilesAndDirs) {
+                              filesAndDirs[i].getFilesAndDirectories().then(function(subFilesAndDirs) {
                                   // iterate through files and directories in sub-directory
                                   iterateFilesAndDirs(subFilesAndDirs, path);
                               });
@@ -178,8 +178,8 @@ Content-Type: text/plain
                   };
 
                   // begin by traversing the chosen files and directories
-                  if ('getFiles' in e.dataTransfer) {
-                      e.dataTransfer.getFiles().then(function(filesAndDirs) {
+                  if ('getFilesAndDirectories' in e.dataTransfer) {
+                      e.dataTransfer.getFilesAndDirectories().then(function(filesAndDirs) {
                           iterateFilesAndDirs(filesAndDirs, '/');
                       });
                   }
@@ -194,11 +194,11 @@ Content-Type: text/plain
       <section>
         <h2>FAQ</h2>
         <ol>
-          <li>Why did we use getContents() instead of enumerate()?</li>
+          <li>Why did we use getFilesAndDirectories() instead of enumerate()?</li>
           <ul>
             <li>We want to be able to save the enumerate() name for the future when we have Observables available so that we can have enumerate() return an Observable.</li>
           </ul>
-          <li>Why are we returning Promise for getContents() instead of an Observable?</li>
+          <li>Why are we returning Promise for getFilesAndDirectories() instead of an Observable?</li>
           <ul>
             <li>The directory upload scenario does not require listening on changes to the file system, therefore Observables would not be warranted.</li>
             <li>Observables, though undoubtedly advantageous in the enumeration scenario, are not well defined yet and it may take a long time before they are.</li>
@@ -206,13 +206,13 @@ Content-Type: text/plain
           </ul>
           <li>Why are we returning an Array in the Promise?</li>
           <ul>
-            <li>Provides a snapshot of the directories and files at the time that getContents() is called. Developers would expect this for directory upload.</li>
+            <li>Provides a snapshot of the directories and files at the time that getFilesAndDirectories() is called. Developers would expect this for directory upload.</li>
             <li>An array allows iterating through the File and Directory objects.</li>
           </ul>
           <li>Why did we remove enumerateDeep() from the originally proposed Directory interface?</li>
           <ul>
-            <li>It is not needed for the time being as recursively calling the getContents() function would fulfill the scenario that enumerateDeep() was meant to fulfill.</li>
-            <li>getContents() would provide a smaller result set compared to enumerateDeep().</li>
+            <li>It is not needed for the time being as recursively calling the getFilesAndDirectories() function would fulfill the scenario that enumerateDeep() was meant to fulfill.</li>
+            <li>getFilesAndDirectories() would provide a smaller result set compared to enumerateDeep().</li>
           </ul>
           <li>Why is it ok to remove the other methods from the originally proposed Directory interface?</li>
           <ul>

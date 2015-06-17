@@ -10,7 +10,7 @@
 	}
 
 	var directoryAttr = 'directory',
-		getFilesMethod = 'getFiles',
+		getFilesMethod = 'getFilesAndDirectories',
 		isSupportedProp = 'isFilesAndDirectoriesSupported';
 
 	var separator = '/';
@@ -22,7 +22,7 @@
 		this._items = false;
 	};
 
-	Directory.prototype.getContents = function() {
+	Directory.prototype[getFilesMethod] = function() {
 		var that = this;
 
 		// from drag and drop
@@ -139,7 +139,7 @@
 					}
 
 					this[getFilesMethod] = function() {
-						return dir.getContents();
+						return dir[getFilesMethod]();
 					};
 				});
 			}
@@ -181,7 +181,7 @@
 				dir._items = e.dataTransfer.items;
 
 				e.dataTransfer[getFilesMethod] = function() {
-					return dir.getContents();
+					return dir[getFilesMethod]();
 				};
 
 				_listener(e);
