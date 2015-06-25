@@ -57,7 +57,7 @@
           <dt>readonly attribute DOMString path</dt>
           <dd>The directory's path relative to its root directory.</dd>
           <dt>Promise&lt;sequence&lt;(File or Directory)>> getFilesAndDirectories ()</dt>
-          <dd>If the <a>Directory</a> has files or sub-directories, a <code>Promise</code> is returned that resolves with a <code>sequence</code> of <code>File</code> and/or <a>Directory</a> which represent a snapshot of the <a>Directory</a>'s contents. If the <a>Directory</a> is empty, a <code>Promise</code> is returned that resolves with an empty <code>sequence</code>. See <a href="http://w3c.github.io/filesystem-api/#widl-Directory-enumerate-Observable--File-or-Directory---DOMString-path">enumerate</a> in FileSystem API spec for more information.</dd>
+          <dd>If the <a>Directory</a> has files or sub-directories, return a <code>Promise</code> resolved with a <code>sequence</code> of <code>File</code> and/or <a>Directory</a> which represent a snapshot of the <a>Directory</a>'s contents, otherwise, if the <a>Directory</a> is empty, return a <code>Promise</code> resolved with an empty <code>sequence</code>. If there is an issue with crawling the directory, return a <code>Promise</code> rejected with an <code>InvalidStateError</code>. See <a href="http://w3c.github.io/filesystem-api/#widl-Directory-enumerate-Observable--File-or-Directory---DOMString-path">enumerate</a> in FileSystem API spec for more information.</dd>
         </dl>
       </section>
       <section>
@@ -103,7 +103,7 @@
           <dt>readonly attribute boolean isFilesAndDirectoriesSupported</dt>
           <dd><code>true</code> if the host OS supports a single dialog capable of picking both files and directories simultaneously, <code>false</code> otherwise.</dd>
           <dt>Promise&lt;sequence&lt;(File or Directory)>> getFilesAndDirectories ()</dt>
-          <dd>Returns a <code>Promise</code> that resolves with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen. If no files or directories were chosen, the <code>Promise</code> resolves with an empty <code>sequence</code>. If the input <code>type</code> is not &quot;file&quot;, nothing occurs.
+          <dd>Returns a <code>Promise</code> resolved with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen, otherwise, if no files or directories were chosen, returns a <code>Promise</code> resolved with an empty <code>sequence</code>. If the input <code>type</code> is not &quot;file&quot;, nothing occurs.
             <pre class="example highlight" title="JavaScript">
               var input = document.getElementById('fileInput');
 
@@ -151,7 +151,7 @@ Content-Type: text/plain
         <p><code>DataTransfer</code>'s <code>files</code> attribute MUST continue to work with no changes to its behavior.</p>
         <dl class="idl" title="partial interface DataTransfer">
           <dt>Promise&lt;sequence&lt;(File or Directory)>> getFilesAndDirectories ()</dt>
-          <dd>Returns a <code>Promise</code> that resolves with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen. If no files or directories were chosen, the <code>Promise</code> resolves with an empty <code>sequence</code>.
+          <dd>Returns a <code>Promise</code> resolved with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen, otherwise, if no files or directories were chosen, returns a <code>Promise</code> resolved with an empty <code>sequence</code>.
             <pre class="example highlight" title="JavaScript">
               document.getElementById('dropDiv').addEventListener('drop', function(e) {
                   e.stopPropagation();
