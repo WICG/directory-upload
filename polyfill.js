@@ -11,7 +11,8 @@
 
 	var directoryAttr = 'directory',
 		getFilesMethod = 'getFilesAndDirectories',
-		isSupportedProp = 'isFilesAndDirectoriesSupported';
+		isSupportedProp = 'isFilesAndDirectoriesSupported',
+		chooseDirMethod = 'chooseDirectory';
 
 	var separator = '/';
 
@@ -25,7 +26,7 @@
 	Directory.prototype[getFilesMethod] = function() {
 		var that = this;
 
-		// from drag and drop
+		// from drag and drop and file input drag and drop (webkitEntries)
 		if (this._items) {
 			var getItem = function(entry) {
 				if (entry.isDirectory) {
@@ -48,7 +49,14 @@
 				var promises = [];
 				
 				for (var i = 0; i < this._items.length; i++) {
-					var entry = this._items[i].webkitGetAsEntry();
+					var entry;
+
+					// from file input drag and drop (webkitEntries)
+					if (this._items[i].isDirectory || this._items[i].isFile) {
+						entry = this._items[i];
+					} else {
+						entry = this._items[i].webkitGetAsEntry();
+					}
 					
 					promises.push(getItem(entry));
 				}
@@ -69,7 +77,7 @@
 					}, reject);
 				});
 			}
-		// from file input
+		// from file input manual selection
 		} else {
 			var arr = [];
 
@@ -90,6 +98,7 @@
 	HTMLInputElement.prototype[isSupportedProp] = navigator.appVersion.indexOf("Mac") !== -1;
 
 	HTMLInputElement.prototype[directoryAttr] = undefined;
+	HTMLInputElement.prototype[chooseDirMethod] = undefined;
 
 	// expose Directory interface to window
 	window.Directory = Directory;
@@ -121,21 +130,133 @@
 			var node = nodes[i];
 
 			if (node.tagName === 'INPUT' && node.type === 'file') {
-				if (node.hasAttribute(directoryAttr)) {
-					node.setAttribute('webkitdirectory', '');
+				// force multiple selection for default behavior
+				if (!node.hasAttribute('multiple')) {
+					node.setAttribute('multiple', '');
 				}
+
+				var shadow = node.createShadowRoot();
+
+				node[chooseDirMethod] = function() {
+					// can't do this without an actual click
+					console.log('This is unsupported. For security reasons the dialog cannot be triggered unless it is a response to some user triggered event such as a click on some other element.');
+				};
+
+				var div = document.createElement('div');
+				div.innerHTML = '<div style="border: 1px solid #999; padding: 3px; width: 235px; box-sizing: content-box; font-size: 14px; height: 21px;">'
+					+ '<div id="fileButtons" style="box-sizing: content-box;">'
+					+ '<button id="button1" style="width: 100px; box-sizing: content-box;">Choose file(s)...</button>'
+					+ '<button id="button2" style="width: 100px; box-sizing: content-box; margin-left: 3px;">Choose folder...</button>'
+					+ '</div>'
+					+ '<div id="filesChosen" style="padding: 3px; display: none; box-sizing: content-box;"><span id="filesChosenText">files selected...</span>'
+					+ '<a id="clear" title="Clear selection" href="javascript:;" style="text-decoration: none; float: right; margin: -3px -1px 0 0; padding: 3px; font-weight: bold; font-size: 16px; color:#999; box-sizing: content-box;">&times;</a>'
+					+ '</div>'
+					+ '</div>'
+					+ '<input id="input1" type="file" multiple style="display: none;">'
+					+ '<input id="input2" type="file" webkitdirectory style="display: none;">'
+					+ '</div>';
+				shadow.appendChild(div);
+
+				shadow.querySelector('#button1').onclick = function(e) {
+					e.preventDefault();
+					
+					shadow.querySelector('#input1').click();
+				};
+
+				shadow.querySelector('#button2').onclick = function(e) {
+					e.preventDefault();
+					
+					shadow.querySelector('#input2').click();
+				};
+
+				var toggleView = function(defaultView, filesLength) {
+					shadow.querySelector('#fileButtons').style.display = defaultView ? 'block' : 'none';
+					shadow.querySelector('#filesChosen').style.display = defaultView ? 'none' : 'block';
+					
+					if (!defaultView) {
+						shadow.querySelector('#filesChosenText').innerText = filesLength + ' file' + (filesLength > 1 ? 's' : '') + ' selected...';
+					}
+				};
+
+				var draggedAndDropped = false;
+
+				var getFiles = function() {
+					var files = node.files;
+
+					if (draggedAndDropped) {
+						files = node.webkitEntries;
+						draggedAndDropped = false;
+					} else {
+						if (files.length === 0) {
+							files = node.shadowRoot.querySelector('#input1').files;
+
+							if (files.length === 0) {
+								files = node.shadowRoot.querySelector('#input2').files;
+
+								if (files.length === 0) {
+									files = node.webkitEntries;
+								}
+							}
+						}
+					}
+
+					return files;
+				};
+
+				var changeHandler = function(e) {
+					node.dispatchEvent(new Event('change'));
+
+					toggleView(false, getFiles().length);
+				};
+
+				shadow.querySelector('#input1').onchange = shadow.querySelector('#input2').onchange = changeHandler;
+
+				var clear = function (e) {
+					toggleView(true);
+
+					var form = document.createElement('form');
+					node.parentNode.insertBefore(form, node);
+					node.parentNode.removeChild(node);
+					form.appendChild(node);
+					form.reset();
+
+					form.parentNode.insertBefore(node, form);
+					form.parentNode.removeChild(form);
+
+					// reset does not instantly occur, need to give it some time
+					setTimeout(function() {
+						node.dispatchEvent(new Event('change'));
+					}, 1);
+				};
+
+				shadow.querySelector('#clear').onclick = clear;
+
+				node.addEventListener('drop', function(e) {
+					draggedAndDropped = true;
+				}, false);
 
 				node.addEventListener('change', function() {
 					var dir = new Directory();
 
-					var files = this.files;
+					var files = getFiles();
 
-					for (var j = 0; j < files.length; j++) {
-						var file = files[j];
-						var path = file.webkitRelativePath;
-						var fullPath = path.substring(0, path.lastIndexOf(separator));
+					if (files.length > 0) {
+						toggleView(false, files.length);
 
-						recurse(dir, path, fullPath, file);
+						// from file input drag and drop (webkitEntries)
+						if (files[0].isFile || files[0].isDirectory) {
+							dir._items = files;
+						} else {
+							for (var j = 0; j < files.length; j++) {
+								var file = files[j];
+								var path = file.webkitRelativePath;
+								var fullPath = path.substring(0, path.lastIndexOf(separator));
+
+								recurse(dir, path, fullPath, file);
+							}
+						}
+					} else {
+						toggleView(true, files.length);
 					}
 
 					this[getFilesMethod] = function() {
