@@ -142,8 +142,7 @@
 					console.log('This is unsupported. For security reasons the dialog cannot be triggered unless it is a response to some user triggered event such as a click on some other element.');
 				};
 
-				var div = document.createElement('div');
-				div.innerHTML = '<div style="border: 1px solid #999; padding: 3px; width: 235px; box-sizing: content-box; font-size: 14px; height: 21px;">'
+				shadow.innerHTML = '<div style="border: 1px solid #999; padding: 3px; width: 235px; box-sizing: content-box; font-size: 14px; height: 21px;">'
 					+ '<div id="fileButtons" style="box-sizing: content-box;">'
 					+ '<button id="button1" style="width: 100px; box-sizing: content-box;">Choose file(s)...</button>'
 					+ '<button id="button2" style="width: 100px; box-sizing: content-box; margin-left: 3px;">Choose folder...</button>'
@@ -155,7 +154,6 @@
 					+ '<input id="input1" type="file" multiple style="display: none;">'
 					+ '<input id="input2" type="file" webkitdirectory style="display: none;">'
 					+ '</div>';
-				shadow.appendChild(div);
 
 				shadow.querySelector('#button1').onclick = function(e) {
 					e.preventDefault();
