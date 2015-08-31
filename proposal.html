@@ -118,7 +118,7 @@
             </pre>
           </dd>
           <dt>void chooseDirectory()</dt>
-          <dd>Triggers the directory picker if <code><a href="#widl-HTMLInputElement-isFilesAndDirectoriesSupported">isFilesAndDirectoriesSupported</a> === false</code>, otherwise triggers the default click behavior of the input element. In either case, if the input <code>type</code> is not &quot;file&quot;, nothing occurs.</dd>
+          <dd>Triggers the directory picker if <code><a href="#widl-HTMLInputElement-isFilesAndDirectoriesSupported">isFilesAndDirectoriesSupported</a> === false</code>, otherwise triggers the default click behavior of the input element. If the input <code>type</code> is not &quot;file&quot;, throws an InvalidStateError exception.</dd>
         </dl>
         <section>
           <h2>Form Submission</h2>
