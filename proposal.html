@@ -105,7 +105,7 @@
           <dt>readonly attribute boolean isFilesAndDirectoriesSupported</dt>
           <dd><code>true</code> if the host OS supports a single dialog capable of picking both files and directories simultaneously, <code>false</code> otherwise.</dd>
           <dt>Promise&lt;sequence&lt;(File or Directory)>> getFilesAndDirectories ()</dt>
-          <dd>Returns a <code>Promise</code> resolved with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen, otherwise, if no files or directories were chosen, returns a <code>Promise</code> resolved with an empty <code>sequence</code>. If the input <code>type</code> is not &quot;file&quot;, nothing occurs.
+          <dd>Returns a <code>Promise</code> resolved with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen, otherwise, if no files or directories were chosen, returns a <code>Promise</code> resolved with an empty <code>sequence</code>. If the input <code>type</code> is not &quot;file&quot;, returns null.
             <pre class="example highlight" title="JavaScript">
               var input = document.getElementById('fileInput');
 
