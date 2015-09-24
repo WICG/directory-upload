@@ -7,15 +7,15 @@
     <script class="remove">
       var respecConfig = {
         shortName:      "DirectoryUpload",
-        specStatus:     "unofficial",
+        specStatus:     "webspec",
         editors:        [{name: "Ali Alabbas", company: "Microsoft"},
-                         {name: "Israel Hilerio", company: "Microsoft"},
-                         {name: "Adrian Bateman", company: "Microsoft"}],
+                         {name: "Jonathan Watt", company: "Mozilla"}],
         processVersion: 2005,
         wg:             "Web Platform Incubator Community Group",
         wgURI:          "https://www.w3.org/community/wicg/",
         wgPublicList:   "public-wicg",
-        subjectPrefix:  "[directory-upload]"
+        subjectPrefix:  "[directory-upload]",
+        repository:     "wicg/directory-upload", 
       };
     </script>
   </head>
@@ -53,39 +53,53 @@
       <section>
         <h2>Directory Interface</h2>
         <p>More information about the <a>Directory</a> interface can be found in the <a href="http://w3c.github.io/filesystem-api/#idl-def-Directory">FileSystem API</a>.</p>
-        <dl class="idl" title="[Exposed=Window,Worker] partial interface Directory">
-          <dt>readonly attribute DOMString name</dt>
-          <dd>The name of the directory.</dd>
-          <dt>readonly attribute DOMString path</dt>
-          <dd>The directory's path relative to its root directory.</dd>
-          <dt>Promise&lt;sequence&lt;(File or Directory)>> getFilesAndDirectories ()</dt>
-          <dd>If the <a>Directory</a> has files or sub-directories, return a <code>Promise</code> resolved with a <code>sequence</code> of <code>File</code> and/or <a>Directory</a> which represent a snapshot of the <a>Directory</a>'s contents, otherwise, if the <a>Directory</a> is empty, return a <code>Promise</code> resolved with an empty <code>sequence</code>. If there is an issue with crawling the directory, return a <code>Promise</code> rejected with an <code>InvalidStateError</code>. See <a href="http://w3c.github.io/filesystem-api/#widl-Directory-enumerate-Observable--File-or-Directory---DOMString-path">enumerate</a> in FileSystem API spec for more information.</dd>
-        </dl>
+        <pre class="idl">
+[Exposed=Window,Worker]
+partial interface Directory {
+    readonly    attribute DOMString name;
+    readonly    attribute DOMString path;
+    Promise&lt;sequence&lt;(File or Directory)&gt;&gt; getFilesAndDirectories();
+};
+        </pre>
+        <dfn>Directory.name</dfn>
+        <p>The name of the directory.</p>
+        <dfn>Directory.path</dfn>
+        <p>The directory's path relative to its root directory.</p>
+        <dfn>Directory.getFilesAndDirectories</dfn>
+        <p>If the <a>Directory</a> has files or sub-directories, return a <code>Promise</code> resolved with a <code>sequence</code> of <code>File</code> and/or <a>Directory</a> which represent a snapshot of the <a>Directory</a>'s contents, otherwise, if the <a>Directory</a> is empty, return a <code>Promise</code> resolved with an empty <code>sequence</code>. If there is an issue with crawling the directory, return a <code>Promise</code> rejected with an <code>InvalidStateError</code>. See <a href="http://w3c.github.io/filesystem-api/#widl-Directory-enumerate-Observable--File-or-Directory---DOMString-path">enumerate</a> in FileSystem API spec for more information.</p>
       </section>
       <section>
         <h2>File Input</h2>
         <p>More information about the <code>HTMLInputElement</code> interface can be found in the <a href="http://www.w3.org/html/wg/drafts/html/CR/forms.html#the-input-element">HTML5 spec</a>.</p>
-        <dl class="idl" title="partial interface HTMLInputElement">
-          <dt>attribute boolean directory</dt>
-          <dd>If the input <code>type</code> is &quot;file&quot; and the <a href="#widl-HTMLInputElement-directory"><code>directory</code></a> attribute is set, the file input can accept directories in addition to files.
-          <div class="note">Adding the <code>multiple</code> attribute does not change the behavior, however, it allows older browsers to make the file input accept multiple files instead of just one since they would not recognize the <a href="#widl-HTMLInputElement-directory"><code>directory</code></a> attribute.</div>
+        <pre class="idl">
+partial interface HTMLInputElement {
+                attribute boolean directory;
+    readonly    attribute boolean isFilesAndDirectoriesSupported;
+    Promise&lt;sequence&lt;(File or Directory)&gt;&gt; getFilesAndDirectories();
+    void                                   chooseDirectory();
+};
+        </pre>
+
+        <dfn>HTMLInputElement.directory</dfn>
+        <p>If the input <code>type</code> is &quot;file&quot; and the <a>HTMLInputElement.directory</a> attribute is set, the file input can accept directories in addition to files.
+          <div class="note">Adding the <code>multiple</code> attribute does not change the behavior, however, it allows older browsers to make the file input accept multiple files instead of just one since they would not recognize the <a>HTMLInputElement.directory</a> attribute.</div>
           If this attribute is set, <code>input.files</code> MUST return <code>null</code>.
-          <div class="note">Due to this, <a href="#widl-HTMLInputElement-getFilesAndDirectories-Promise-sequence--File-or-Directory"><code>getFilesAndDirectories</code></a> must be called to retrieve the chosen files and directories.</div>
+          <div class="note">Due to this, <a>HTMLInputElement.getFilesAndDirectories</a> must be called to retrieve the chosen files and directories.</div>
             <pre class="example highlight" title="HTML">
               &lt;input type="file" id="fileInput" directory multiple />
                     &lt;!-- Supports being able to select multiple files and/or directories -->
                     &lt;!-- Adding the multiple attribute is useful because older browsers would be able -->
                     &lt;!-- to accept multiple files even if they do not recognize the directory attribute -->
             </pre>
-            <p>If the host OS supports a combined file and directory picker (i.e. <code><a href="#widl-HTMLInputElement-isFilesAndDirectoriesSupported">isFilesAndDirectoriesSupported</a> === true</code>) a file input with a single button that enables the combined picker MUST be rendered:</p>
+            <p>If the host OS supports a combined file and directory picker (i.e. <code><a>HTMLInputElement.isFilesAndDirectoriesSupported</a> === true</code>) a file input with a single button that enables the combined picker MUST be rendered:</p>
             <figure>
-              <div style="border: 1px solid #999; color: #444; font-size: 14px; width: 285px; height: 20px; line-height: 20px; padding: 5px 5px 5px 10px;">
+              <div style="border: 1px solid #999; color: #444; font-size: 14px; width: 285px; height: 20px; line-height: 20px; padding: 5px 5px 5px 10px; text-align: left;">
                 1 file selected.
                 <div style="float: right; width: 132.5px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center;">Choose file(s)...</div>
               </div>
               <figcaption>Clicking &quot;Choose file(s)&quot; activates combined file &amp; directory picker</figcaption>
             </figure>
-            <p>If it is not supported (i.e. <code><a href="#widl-HTMLInputElement-isFilesAndDirectoriesSupported">isFilesAndDirectoriesSupported</a> === false</code>) a file input that enables two separate pickers (file and directory) via two different buttons MUST be rendered:</p>
+            <p>If it is not supported (i.e. <code><a>HTMLInputElement.isFilesAndDirectoriesSupported</a> === false</code>) a file input that enables two separate pickers (file and directory) via two different buttons MUST be rendered:</p>
             <figure>
               <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px; width: 290px; height: 20px; line-height: 20px;">
                 <div style="float: left; width: 130px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center;">Choose files...</div>
@@ -94,18 +108,19 @@
               <figcaption>Default (no selection)</figcaption>
             </figure>
             <figure>
-              <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px 5px 5px 10px; width: 285px; height: 20px; line-height: 20px;">
+              <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px 5px 5px 10px; width: 285px; height: 20px; line-height: 20px; text-align: left;">
                 2 files selected.
                 <div style="float: right; height: 13px; line-height: 13px; padding: 5px; font-weight: bold; font-size: 16px; color: #999;">&times;</div>
               </div>
               <figcaption>After a selection has been made; clearing the field will reset it to <a href="#fig-default-no-selection"></a></figcaption>
             </figure>
-            <p>The default click behavior of such a file input MUST trigger the file picker. Calling <a href="#widl-HTMLInputElement-chooseDirectory-void"><code>chooseDirectory</code></a> on the file input element MUST trigger the directory picker.</p>
-          </dd>
-          <dt>readonly attribute boolean isFilesAndDirectoriesSupported</dt>
-          <dd><code>true</code> if the host OS supports a single dialog capable of picking both files and directories simultaneously, <code>false</code> otherwise.</dd>
-          <dt>Promise&lt;sequence&lt;(File or Directory)>> getFilesAndDirectories ()</dt>
-          <dd>Returns a <code>Promise</code> resolved with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen, otherwise, if no files or directories were chosen, returns a <code>Promise</code> resolved with an empty <code>sequence</code>. If the input <code>type</code> is not &quot;file&quot;, returns null.
+            <p>The default click behavior of such a file input MUST trigger the file picker. Calling <a>HTMLInputElement.chooseDirectory</a> on the file input element MUST trigger the directory picker.</p>
+
+        <dfn>HTMLInputElement.isFilesAndDirectoriesSupported</dfn>
+        <p><code>true</code> if the host OS supports a single dialog capable of picking both files and directories simultaneously, <code>false</code> otherwise.</p>
+
+        <dfn>HTMLInputElement.getFilesAndDirectories</dfn>
+        <p>Returns a <code>Promise</code> resolved with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen, otherwise, if no files or directories were chosen, returns a <code>Promise</code> resolved with an empty <code>sequence</code>. If the input <code>type</code> is not &quot;file&quot;, returns null.
             <pre class="example highlight" title="JavaScript">
               var input = document.getElementById('fileInput');
 
@@ -115,14 +130,14 @@
                       // see drag and drop example below for more details
                   });
               }
-            </pre>
-          </dd>
-          <dt>void chooseDirectory()</dt>
-          <dd>Triggers the directory picker if <code><a href="#widl-HTMLInputElement-isFilesAndDirectoriesSupported">isFilesAndDirectoriesSupported</a> === false</code>, otherwise triggers the default click behavior of the input element. If the input <code>type</code> is not &quot;file&quot; returns a <code>Promise</code> rejected with an <code>InvalidStateError</code> exception.</dd>
-        </dl>
+            </pre></p>
+
+        <dfn>HTMLInputElement.chooseDirectory</dfn>
+        <p>Triggers the directory picker if <code><a>HTMLInputElement.isFilesAndDirectoriesSupported</a> === false</code>, otherwise triggers the default click behavior of the input element. If the input <code>type</code> is not &quot;file&quot; returns a <code>Promise</code> rejected with an <code>InvalidStateError</code> exception.</p>
+
         <section>
           <h2>Form Submission</h2>
-          <p>When a form is submitted with <code class="highlight">enctype="multipart/form-data"</code> and a file input with the <a href="#widl-HTMLInputElement-directory"><code>directory</code></a> attribute (and a directory named &quot;docs&quot; was picked) it MUST adhere to the following pattern in its request payload:</p>
+          <p>When a form is submitted with <code class="highlight">enctype="multipart/form-data"</code> and a file input with the <a>HTMLInputElement.directory</a> attribute (and a directory named &quot;docs&quot; was picked) it MUST adhere to the following pattern in its request payload:</p>
           <pre class="example highlight">
 ------Boundary
 Content-Disposition: form-data; name="file"; filename="docs/1.txt"
@@ -151,9 +166,13 @@ Content-Type: text/plain
         <h2>Drag and Drop</h2>
         <p>More information about the <code>DataTransfer</code> interface can be found in the <a href="http://www.w3.org/TR/2010/WD-html5-20101019/dnd.html#datatransfer">HTML5 spec</a>.</p>
         <p><code>DataTransfer</code>'s <code>files</code> attribute MUST continue to work with no changes to its behavior.</p>
-        <dl class="idl" title="partial interface DataTransfer">
-          <dt>Promise&lt;sequence&lt;(File or Directory)>> getFilesAndDirectories ()</dt>
-          <dd>Returns a <code>Promise</code> resolved with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen, otherwise, if no files or directories were chosen, returns a <code>Promise</code> resolved with an empty <code>sequence</code>.
+<pre class="idl">
+partial interface DataTransfer {
+    Promise&lt;sequence&lt;(File or Directory)&gt;&gt; getFilesAndDirectories();
+};
+</pre>
+        <dfn>DataTransfer.getFilesAndDirectories</dfn>
+        <p>Returns a <code>Promise</code> resolved with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen, otherwise, if no files or directories were chosen, returns a <code>Promise</code> resolved with an empty <code>sequence</code>.
             <pre class="example highlight" title="JavaScript">
               document.getElementById('dropDiv').addEventListener('drop', function(e) {
                   e.stopPropagation();
@@ -186,9 +205,7 @@ Content-Type: text/plain
                       });
                   }
               });
-            </pre>
-          </dd>
-        </dl>
+            </pre></p>
       </section>
     </section>
     <section class="informative">
