@@ -9,7 +9,8 @@
         shortName:      "DirectoryUpload",
         specStatus:     "webspec",
         editors:        [{name: "Ali Alabbas", company: "Microsoft"},
-                         {name: "Jonathan Watt", company: "Mozilla"}],
+                         {name: "Jonathan Watt", company: "Mozilla"},
+                         {name: "Arun Ranganathan", company: "Mozilla"}],
         processVersion: 2005,
         wg:             "Web Platform Incubator Community Group",
         wgURI:          "https://www.w3.org/community/wicg/",
@@ -22,12 +23,12 @@
   <body>
     <section id="abstract">
       <p>
-        This spec aims to enable directory uploading by allowing a developer to read directory contents (files and sub-directories) asynchronously and be able to identify the directory structure.
+        This spec enables directory uploading by allowing a developer to read directory contents (files and sub-directories) asynchronously and be able to identify the directory structure. This specification proposes changes to [[!HTML]] (in particular, additional API surface on <code>HTMLInputElement</code>, along with an additional atribute on the <code>&lt;input ...&gt; </code>element) as well as a new specification called <em>Directory Upload</em> which brings directories to the web.
       </p>
     </section>
     <section id="sotd">
       <p>
-        This spec is currently being proposed with the expectation that there may be changes.
+        This spec is currently being proposed within the WICG (Web Incubator Community Group) with the expectation that there may be changes, and that aspects of this proposal will eventually be part of the [[!HTML]] and [[!FileAPI]] standards.
       </p>
     </section>
     <section class="informative">
@@ -35,6 +36,7 @@
       <section>
         <h2>Background</h2>
         <p>Websites are currently able to provide functionality for uploading files by using <code class="hightlight">&lt;input type="file" multiple></code> and drag and drop. However, there currently is no standard solution to handle directories and cases that involve a mix of files and directories. This spec will provide the necessary mechanisms to enable directory uploading.</p>
+        
       </section>
       <section>
         <h2>Scenarios</h2>
@@ -49,24 +51,115 @@
       </section>
     </section>
     <section>
+      <h2>Model</h2>
+      <section>
+        <h3>Directory, File, Root, and Path</h3>
+      <p>In this specification, a <dfn id="directoryConcept">directory</dfn> is a logical organizing storage unit with a distinct <dfn>name</dfn> which contains <a href="#fileConcept">files</a> and/or one or more <dfn id="subdirectoryConcept">subdirectory</dfn> units (which are themselves <a href="#directoryConcept">directories</a>). A <a href="#directoryConcept">directory</a> corresponds to the same concept from the underlying OS filesystem, which is also called a <em>folder</em> on some underlying OS filesystems. A <dfn id="fileConcept">file</dfn> is <em>durable binary data</em> retrieved from the underlying OS filesystem, and can be programmatically manipulated by web applications as defined in the [[!FileAPI]]. In this specification, <a href="#fileConcept">files</a> and <a href="#directoryConcept">directories</a> which are selected by the user are represented by a <a>temporary directory tree</a>. <a href="fileConcept">Files</a> and <a href="#directoryConcept">directories</a> selected by the user have a position on the <a>temporary directory tree</a> that can be represented by a string, called a <dfn>path</dfn>. The <a>path</a> string uses the U+002F SOLIDUS character ("/") to denote directory hierarchy within the <a>temporary directory tree</a>.  <a href="#fileConcept">Files</a>, like <a href="#directoryConcept">directories</a>, have distinct <a>name</a>s and <a>path</a>s which identify them on a <a>temporary directory tree</a>. </p>
+      <p> The top-most containing <a href="#directoryConcept">directory</a>, which contains all <a href="#directoryConcept">directories</a> and <a href="#fileConcept">files</a>, if any exist, is called the <dfn>root</dfn> <a href="#directoryConcept">directory</a>, and has the following properties:</p> 
+    <ul>
+      <li><p>It is not contained by any other <a href="#directoryConcept">directory</a> in the <a>temporary directory tree</a>; it contains all others. It is the <em>root</em> of the <a>temporary directory tree</a>. </p></li>
+      <li><p>It is represented by a <a>path</a> that is equal to a single "/" U+002F SOLIDUS.</p>
+      </li>
+      <li><p>The <a href="#directoryConcept">directory</a> <em>from which</em> a user makes selections of <a href="#fileConcept">files</a> and <a href="#subdirectoryConcept">subdirectories</a> is considered an <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a> and has a <a>path</a> that is equal to a single "/" U+002F SOLIDUS concatenated with its name.</p>
+      <pre class="example highlight">
+        /**
+
+           The user picks items from a directory called 'music' 
+           which is the top-most selection and an 
+           immediate child of "/"
+        
+        **/
+
+        console.log(selection.path); 
+
+        // output is "/music"
+      </pre>
+      </li>
+    </ul>
+    
+    </section>
+    <section>
+      <h3>The Temporary Directory Tree</h3>
+      <p>In this specification, a <dfn>temporary directory tree</dfn> consists of <a href="#directoryConcept">directories</a> and <a href="#fileConcept">file</a>s, along with the affiliated <a>path from root</a>, for each <a href="#directoryConcept">directory</a> and <a href="#fileConcept">file</a> that the user has selected from the underlying OS filesystem; each such <a href="#directoryConcept">directory</a> or <a href="#fileConcept">file</a> must correspond to a node in the <a>temporary directory tree</a>, with the top-most <a href="#directoryConcept">directory</a> being the <a href="#directoryConcept">directory</a> <em>from which</em> the user has made selections of <a href="#fileConcept">files</a> and <a href="#directoryConcept">directories</a>. </p>
+    <p>The <dfn>present working directory</dfn> is the node on the <a>temporary directory tree</a> that represents the current <a href="#directoryConcept">directory</a> from which an operation is taking place. In this specification, this is the <a href="#directoryConcept">directory</a> from which a <a><code>Directory</code></a> interface operation or attribute is called. </p>
+    <p>A <a>path</a> to a given <a href="#directoryConcept">directory</a> or <a href="#fileConcept">file</a> from the <a>root</a> <a href="#directoryConcept">directory</a> is said to be a <dfn>path from root</dfn> and starts with a leading "/" U+002F SOLIDUS character and ends with the name of the <a href="#fileConcept">file</a> or <a href="#directoryConcept">directory</a>. </p>
+      <pre class="example highlight">
+/**
+
+  path from root of the 'jazz' directory, with 'music' 
+  being the directory from which the user has made 
+  selections of files and directories.  
+
+**/
+
+console.log(currentSelection.path);
+
+// output is "/music/genres/jazz"; 
+
+console.log(currentSelection.name);
+
+// output is "jazz"
+ </pre>
+
+<p>A <dfn>child</dfn> is a node on the <a>temporary directory tree</a> with a position that is below a given position on the <a>temporary directory tree</a> for a given <a href="#directoryConcept">directory</a>; a <a href="#subdirectoryConcept">subdirectory</a> of the <a>present working directory</a> is a <a>child</a> of the <a>present working directory</a>; a <a href="#subdirectoryConcept">subdirectory</a> of <em>that</em> <a href="#subdirectoryConcept">subdirectory</a> is also a <a>child</a> of the <a>present working directory</a>. An <dfn>immediate child</dfn> corresponds to a node on the <a>temporary directory tree</a> that is either a <a href="#subdirectoryConcept">subdirectory</a> that is the next position on the <a>path</a>, or a <a href="#fileConcept">file</a> that is next on the <a>path</a>. A <dfn>parent</dfn> is a <a href="#directoryConcept">directory</a> that contains a <a href="#fileConcept">file</a> or another <a href="#directoryConcept">directory</a>; in particular, the <a href="#directoryConcept">directory</a> that contains the <a>present working directory</a> is its <a>parent</a>. The <a>root</a> <a href="#directoryConcept">directory</a> is the <a>parent</a> of all other nodes in the <a>temporary directory tree</a>.</p>
+
+    </section>
+    <section>
+    <h3>Returning Files and Directories</h3>
+
+    <p>When this specification says to <dfn>return a file or directory sequence promise</dfn> on a given <a>present working directory</a>, the user agent should run the following steps:</p>
+    <ol>
+      <li><p>Let <var>p</var> be a new promise and <var>s</var> a sequence, initially set to an empty sequence.</p></li>
+      <li><p>Run the following steps asynchronously:</p>
+        <ol>
+          <li><p>If the <a>present working directory</a> has no <a href="#fileConcept">files</a> or <a href="#directoryConcept">directories</a>, resolve <var>p</var> with <var>s</var>, which is still an empty sequence.</p></li>
+          <li><p>Otherwise, for each <a>immediate child</a> of the <a>present working directory</a>, add the corresponding node to <var>s</var> as a <a><code>File</code></a> or <a>Directory</a> object, depending on the type of the <a>immediate child</a>.</p></li>
+          <li><p>If there are any problems retrieving any <a>immediate child</a>, reject <var>p</var> with an <code>InvalidStateError</code>.</p>
+          <div class="note"><p>Promise rejection occurs for any problem crawling the <a>present working directory</a>.</p></div>  
+          </li>
+          <li><p>Once all the <a>immediate child</a> nodes of the <a>present working directory</a> have been added to <var>s</var> as a <a><code>File</code></a> or <a><code>Directory</code></a>, resolve <var>p</var> with <var>s</var>.</p></li>
+        </ol>
+
+      </li>
+      <li><p>Return <var>p</var>.</p></li>
+    </ol>
+    <div class="note"><p>A common method on both the <code>HTMLInputElement</code> and on the <code>Directory</code> interface called <code>getFilesAndDirectories()</code> returns <a href="#fileConcept">files</a> and <a href="#subdirectoryConcept">subdirectories</a> for a given <a href="#directoryConcept">directory</a> using the steps above. Each method invoking the steps above must specify what to consider as the <a>present working directory</a>. </p></div>
+    </section>  
+    </section>
+    <section>
       <h2>APIs</h2>
       <section>
         <h2>Directory Interface</h2>
-        <p>More information about the <a>Directory</a> interface can be found in the <a href="http://w3c.github.io/filesystem-api/#idl-def-Directory">FileSystem API</a>.</p>
+        <p>The <a>Directory</a> interface represents a <a href="#directoryConcept">directory</a> on the <a>Directory Tree</a>. Methods and attributes on a <a>Directory</a> interface must act as if it is the <a>present working directory</a>.</p>
         <pre class="idl">
-[Exposed=Window,Worker]
-partial interface Directory {
+[Exposed=(Window,Worker)]
+interface Directory {
     readonly    attribute DOMString name;
     readonly    attribute DOMString path;
     Promise&lt;sequence&lt;(File or Directory)&gt;&gt; getFilesAndDirectories();
 };
         </pre>
         <dfn>Directory.name</dfn>
-        <p>The name of the directory.</p>
+        <p>On getting, this attribute must return the name of the <a>present working directory</a>.</p>
+        <div class="issue"><p>We need normative language around characters that aren't allowed in a name; we also need to determine if
+          DOMString is sufficient.</p></div>
         <dfn>Directory.path</dfn>
-        <p>The directory's path relative to its root directory.</p>
+        <p>On getting, this attribute must return the <a>path from root</a> of the <a>present working directory</a>, including its <a>name</a>.</p>
+        <pre class="example highlight">
+          // path of directory jazz
+
+          /music/genres/jazz
+
+          // path of file milesDavis.mp3
+
+          /music/genres/jazz/milesDavis.mp3
+
+
+        </pre>
+
         <dfn>Directory.getFilesAndDirectories</dfn>
-        <p>If the <a>Directory</a> has files or sub-directories, return a <code>Promise</code> resolved with a <code>sequence</code> of <code>File</code> and/or <a>Directory</a> which represent a snapshot of the <a>Directory</a>'s contents, otherwise, if the <a>Directory</a> is empty, return a <code>Promise</code> resolved with an empty <code>sequence</code>. If there is an issue with crawling the directory, return a <code>Promise</code> rejected with an <code>InvalidStateError</code>. See <a href="http://w3c.github.io/filesystem-api/#widl-Directory-enumerate-Observable--File-or-Directory---DOMString-path">enumerate</a> in FileSystem API spec for more information.</p>
+       <p>When the <code>getFilesAndDirectories()</code> method is called, the user agent must <a>return a file or directory sequence promise</a> with this <a href="#directoryConcept">directory</a> as the <a>present working directory</a>.</p>
+    
       </section>
       <section>
         <h2>File Input</h2>
@@ -117,40 +210,59 @@ partial interface HTMLInputElement {
             <p>The default click behavior of such a file input MUST trigger the file picker. Calling <a>HTMLInputElement.chooseDirectory</a> on the file input element MUST trigger the directory picker.</p>
 
         <dfn>HTMLInputElement.isFilesAndDirectoriesSupported</dfn>
-        <p><code>true</code> if the host OS supports a single dialog capable of picking both files and directories simultaneously, <code>false</code> otherwise.</p>
+        <p>On getting, this attribute is <code>true</code> if the host OS supports a single dialog capable of picking both files and directories simultaneously, <code>false</code> otherwise.</p>
 
         <dfn>HTMLInputElement.getFilesAndDirectories</dfn>
-        <p>Returns a <code>Promise</code> resolved with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen, otherwise, if no files or directories were chosen, returns a <code>Promise</code> resolved with an empty <code>sequence</code>. If the input <code>type</code> is not &quot;file&quot;, returns null.
+       <p>When the <code>getFilesAndDirectories()</code> method is called, the user agent must run the steps below:</p>
+      <ol>
+        <li><p>Let <var>d</var> be the <a href="#directoryConcept">directory</a> on the underlying filesystem OS containing the user's selections of <a href="#fileConcept">files</a> and <a href="#directoryConcept">directories</a>. Set <var>d</var> to be the <a>present working directory</a> and an <a>immediate child</a> of the <a>root</a> <a href="#directoryConcept">directory</a> on the <a>temporary directory tree</a>. </p>
+        </li>
+        <li><p>Using <var>d</var> as the <a>present working directory</a> <a>return a file or directory sequence promise</a>.</p>
+        <div class="note">In order to retrieve all selections reliably, developers should call this method after the <code>change</code> event on <code>HTMLInputElement</code> has fired. Guidance in developer documentation here would be helpful.</div>
+        </li>
+      </ol>
             <pre class="example highlight" title="JavaScript">
-              var input = document.getElementById('fileInput');
+            <!-- markup snippet might look like this -->
 
-              if ('getFilesAndDirectories' in input) {
+            &lt;input id='fileInput' type=file multiple directory
+             ondragover="alertLength(event);"
+             onchange="handleChangeEvent(event);"&gt;
+
+              // Within a script block we handle change event
+
+              function handleChangeEvent(e){
+                // change event fires on input element
+                var input = document.getElementById('fileInput');
+
+                if ('getFilesAndDirectories' in input) {
                   input.getFilesAndDirectories().then(function(filesAndDirs) {
                       // iterate through each item
                       // see drag and drop example below for more details
                   });
               }
-            </pre></p>
+            }
+            </pre>
 
         <dfn>HTMLInputElement.chooseDirectory</dfn>
-        <p>Triggers the directory picker if <code><a>HTMLInputElement.isFilesAndDirectoriesSupported</a> === false</code>, otherwise triggers the default click behavior of the input element. If the input <code>type</code> is not &quot;file&quot; returns a <code>Promise</code> rejected with an <code>InvalidStateError</code> exception.</p>
+        <p>Triggers the directory picker if <code><a>HTMLInputElement.isFilesAndDirectoriesSupported</a> === false</code>, otherwise triggers the default click behavior of the input element.</p>
 
         <section>
           <h2>Form Submission</h2>
           <p>When a form is submitted with <code class="highlight">enctype="multipart/form-data"</code> and a file input with the <a>HTMLInputElement.directory</a> attribute (and a directory named &quot;docs&quot; was picked) it MUST adhere to the following pattern in its request payload:</p>
+          <div class="issue">TODO: generate form submission output from <a>temporary directory tree</a>.</div>
           <pre class="example highlight">
 ------Boundary
-Content-Disposition: form-data; name="file"; filename="docs/1.txt"
+Content-Disposition: form-data; name="file"; filename="/docs/1.txt"
 Content-Type: text/plain
 
 [DATA]
 ------Boundary
-Content-Disposition: form-data; name="file"; filename="docs/path/2.txt"
+Content-Disposition: form-data; name="file"; filename="/docs/path/2.txt"
 Content-Type: text/plain
 
 [DATA]
 ------Boundary
-Content-Disposition: form-data; name="file"; filename="docs/path/to/3.txt"
+Content-Disposition: form-data; name="file"; filename="/docs/path/to/3.txt"
 Content-Type: text/plain
 
 [DATA]
@@ -172,7 +284,13 @@ partial interface DataTransfer {
 };
 </pre>
         <dfn>DataTransfer.getFilesAndDirectories</dfn>
-        <p>Returns a <code>Promise</code> resolved with a <code>sequence</code> of the files (<code>File</code>) and directories (<a>Directory</a>) chosen, otherwise, if no files or directories were chosen, returns a <code>Promise</code> resolved with an empty <code>sequence</code>.
+       <p>When the <code>getFilesAndDirectories()</code> method is called, the user agent must run the steps below:</p>
+    <ol>
+        <li><p>Let <var>d</var> be the <a href="#directoryConcept">directory</a> on the underlying filesystem OS containing the user's selections of <a href="#fileConcept">files</a> and <a href="#directoryConcept">directories</a>. Set <var>d</var> to be the <a>present working directory</a> and an <a>immediate child</a> of the <a>root</a> <a href="#directoryConcept">directory</a> on the <a>temporary directory tree</a>. </p>
+        </li>
+        <li><p>Using <var>d</var> as the <a>present working directory</a> <a>return a file or directory sequence promise</a>.</p>
+        </li>
+      </ol>
             <pre class="example highlight" title="JavaScript">
               document.getElementById('dropDiv').addEventListener('drop', function(e) {
                   e.stopPropagation();
@@ -205,7 +323,7 @@ partial interface DataTransfer {
                       });
                   }
               });
-            </pre></p>
+            </pre>
       </section>
     </section>
     <section class="informative">
