@@ -127,6 +127,19 @@ console.log(currentSelection.name);
     </section>  
     </section>
     <section>
+      <h2>Attributes</h2>
+      <div class="note"><p>This section will eventually be a pull request to the HTML specification.</p></div>
+      <p>When an <code>input</code> element's type attribute is in the <dfn>File Upload</dfn> state, the rules in this section apply [[!HTML]].</p>
+      <p>When the <code>input</code> element is in the <a>File Upload</a> state, it can represent two distinct types of user selections: 
+        <ul>
+        <li><p>If the <a href="#directoryAttribute"><code>directory</code></a> attribute is NOT set, it represents a list of <em>only</em> the selected files, each file consisting of a file name, a file type, and a file body (the contents of the file). </p></li>
+        <li><p>If the <a href="#directoryAttribute"><code>directory</code></a> attribute is set, it represents a sequence of <em>both</em> the selections of files and <a href="#directoryConcept">directories</a>.</li></p>
+      </ul>
+      <p>The <dfn id="directoryAttribute"><code>directory</code></dfn> attribute is a boolean attribute [[!HTML]] that indicates whether a user is allowed the selection of both of <a href="#fileConcept">files</a> and <a href="#directoryConcept">directories</a>.</p>
+    
+
+    </section>
+    <section>
       <h2>APIs</h2>
       <section>
         <h2>Directory Interface</h2>
