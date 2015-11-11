@@ -109,6 +109,7 @@ console.log(currentSelection.name);
 
     <p>When this specification says to <dfn>return a file or directory sequence promise</dfn> on a given <a>present working directory</a>, the user agent should run the following steps:</p>
     <ol>
+      <li><p>If the result of running <a href="https://w3c.github.io/webappsec-secure-contexts/#settings-object">is settings object a secure context</a> with the <a href="https://html.spec.whatwg.org/multipage/webappapis.html#incumbent-settings-object">incumbent settings object</a> is <code>Not Secure</code>, return a new promise rejected with a "<code>SecurityError</code>" exception.</p></li>
       <li><p>Let <var>p</var> be a new promise and <var>s</var> a sequence, initially set to an empty sequence.</p></li>
       <li><p>Run the following steps asynchronously:</p>
         <ol>
@@ -124,6 +125,53 @@ console.log(currentSelection.name);
       <li><p>Return <var>p</var>.</p></li>
     </ol>
     <div class="note"><p>A common method on both the <code>HTMLInputElement</code> and on the <code>Directory</code> interface called <code>getFilesAndDirectories()</code> returns <a href="#fileConcept">files</a> and <a href="#subdirectoryConcept">subdirectories</a> for a given <a href="#directoryConcept">directory</a> using the steps above. Each method invoking the steps above must specify what to consider as the <a>present working directory</a>. </p></div>
+    </section>
+    <section>
+      <h3>Triggering a Directory Picker</h3>
+      <p>When an <code>input</code> element's <code>type</code> attribute is in the <a>File Upload</a> state, the rules in this section apply [[!HTML]].</p>
+      <p>User agents may surface a directory picker, which may also serve as a file picker; this is an unspecified piece of user interface that a user agent may deploy, and may expand upon any existing user interface already in place for selecting files when the <code>input</code> element's <code>type</code> attribute is in the <a>File Upload</a> state. This generally happens synchronously and is considered a blocking operation. When this specification says to <dfn>trigger a directory picker</dfn> a user agent must follow the steps below (and may optionally follow the steps labeled "may" [[!RFC2119]]): </p>
+      <ol>
+        <li><p>If the result of running <a href="https://w3c.github.io/webappsec-secure-contexts/#settings-object">is settings object a secure context</a> with the <a href="https://html.spec.whatwg.org/multipage/webappapis.html#incumbent-settings-object">incumbent settings object</a> is <code>Not Secure</code>, the user agent must throw a <code>SecurityError</code> exception and additionally may prevent a directory picker from being shown at all. </p></li>
+        <li><p>If the user agent is capable of surfacing both a directory picker and a file picker in a single user interface element, this user agent is said to have a <dfn>Single File and Directory Picker</dfn>. This user agent must expose a value of <code>true</code> on the <a><code>isFilesAndDirectoriesSupported</code></a> attribute of the <a><code>HTMLInputElement</code></a>. </p>
+        <p>User agents in practice may reuse user interface elements from the host OS. If the host OS supports a <a>Single File and Directory Picker</a> a file input with a single button that enables the combined picker may be rendered and may resemble the suggested user interface element below:</p>
+            <figure>
+              <div style="border: 1px solid #999; color: #444; font-size: 14px; width: 285px; height: 20px; line-height: 20px; padding: 5px 5px 5px 10px; text-align: left;">
+                1 file selected.
+                <div style="float: right; width: 132.5px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center;">Choose file(s)...</div>
+              </div>
+              <figcaption>Clicking &quot;Choose file(s)&quot; activates combined file &amp; directory picker.</figcaption>
+            </figure>
+            <div class="note"><p>Currently, only OSX exposes a unified picker.</p></div>
+
+        </li>
+        <li><p>If the user agent does not have a <a>Single File and Directory Picker</a> it is said to have <dfn>Distinct File and Directory Pickers</dfn>. This user agent must expose a value of <code>false</code> on the <a><code>isFilesAndDirectoriesSupported</code></a> attribute of the <a><code>HTMLInputElement</code></a>.</p>
+        <p>If the user agent has <a>Distinct File and Directory Pickers</a>, possibly reusing user interface elements from the host OS, a file input that enables two separate pickers (file and directory) via two different buttons may be rendered and may resemble the suggested user interface element below:</p>
+            <figure>
+              <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px; width: 290px; height: 20px; line-height: 20px;">
+                <div style="float: left; width: 130px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center;">Choose files...</div>
+                <div style="float: left; width: 130px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center; margin-left: 5px;">Choose directories...</div>
+              </div>
+              <figcaption>Default (no selection)</figcaption>
+            </figure>
+            <figure>
+              <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px 5px 5px 10px; width: 285px; height: 20px; line-height: 20px; text-align: left;">
+                2 files selected.
+                <div style="float: right; height: 13px; line-height: 13px; padding: 5px; font-weight: bold; font-size: 16px; color: #999;">&times;</div>
+              </div>
+              <figcaption>After a selection has been made; clearing the field may reset it to <a href="#fig-default-no-selection"></a>.</figcaption>
+            </figure>
+        </li>
+        <li><p>If the user agent has <a>Distinct File and Directory Pickers</a> and is set to trigger in <dfn>Directory Picker Only</dfn> mode, it may only surface a picker that allows for directory picking, or it may surface a picker featuring two separate buttons as in <a href="#fig-default-no-selection">figure two above</a>. The suggested user interface element below may be used to surface an option to only pick directories:</p>
+        <figure>
+           <div style="border: 1px solid #999; color: #444; font-size: 14px; width: 285px; height: 20px; line-height: 20px; padding: 5px 5px 5px 10px; text-align: left;">
+          <div style="float: left; width: 132.5px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center; margin-left: 5px;">Choose directories...</div>
+        </div>
+          <figcaption>Clicking &quot;Choose directories...&quot; activates a directory picker only.</figcaption>
+        </figure>  
+
+        </li>
+      </ol>
+
     </section>  
     </section>
     <section>
@@ -197,33 +245,13 @@ partial interface HTMLInputElement {
                     &lt;!-- Adding the multiple attribute is useful because older browsers would be able -->
                     &lt;!-- to accept multiple files even if they do not recognize the directory attribute -->
             </pre>
-            <p>If the host OS supports a combined file and directory picker (i.e. <code><a>HTMLInputElement.isFilesAndDirectoriesSupported</a> === true</code>) a file input with a single button that enables the combined picker MUST be rendered:</p>
-            <figure>
-              <div style="border: 1px solid #999; color: #444; font-size: 14px; width: 285px; height: 20px; line-height: 20px; padding: 5px 5px 5px 10px; text-align: left;">
-                1 file selected.
-                <div style="float: right; width: 132.5px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center;">Choose file(s)...</div>
-              </div>
-              <figcaption>Clicking &quot;Choose file(s)&quot; activates combined file &amp; directory picker</figcaption>
-            </figure>
-            <p>If it is not supported (i.e. <code><a>HTMLInputElement.isFilesAndDirectoriesSupported</a> === false</code>) a file input that enables two separate pickers (file and directory) via two different buttons MUST be rendered:</p>
-            <figure>
-              <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px; width: 290px; height: 20px; line-height: 20px;">
-                <div style="float: left; width: 130px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center;">Choose files...</div>
-                <div style="float: left; width: 130px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center; margin-left: 5px;">Choose directory...</div>
-              </div>
-              <figcaption>Default (no selection)</figcaption>
-            </figure>
-            <figure>
-              <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px 5px 5px 10px; width: 285px; height: 20px; line-height: 20px; text-align: left;">
-                2 files selected.
-                <div style="float: right; height: 13px; line-height: 13px; padding: 5px; font-weight: bold; font-size: 16px; color: #999;">&times;</div>
-              </div>
-              <figcaption>After a selection has been made; clearing the field will reset it to <a href="#fig-default-no-selection"></a></figcaption>
-            </figure>
+            
+            
+            
             <p>The default click behavior of such a file input MUST trigger the file picker. Calling <a>HTMLInputElement.chooseDirectory</a> on the file input element MUST trigger the directory picker.</p>
 
         <dfn>HTMLInputElement.isFilesAndDirectoriesSupported</dfn>
-        <p>On getting, this attribute is <code>true</code> if the host OS supports a single dialog capable of picking both files and directories simultaneously, <code>false</code> otherwise.</p>
+        <p>On getting, this attribute must be <code>true</code> if the user agent will expose a <a>Single File and Directory Picker</a>, and <code>false</code> if the user agent will expose <a>Distinct File and Directory Pickers</a>.</p>
 
         <dfn>HTMLInputElement.getFilesAndDirectories</dfn>
        <p>When the <code>getFilesAndDirectories()</code> method is called, the user agent must run the steps below:</p>
@@ -257,7 +285,9 @@ partial interface HTMLInputElement {
             </pre>
 
         <dfn>HTMLInputElement.chooseDirectory</dfn>
-        <p>Triggers the directory picker if <code><a>HTMLInputElement.isFilesAndDirectoriesSupported</a> === false</code>, otherwise triggers the default click behavior of the input element.</p>
+        <p>When the <code>choseDirectory()</code> method is called, a user agent must <a>trigger a directory picker</a> in <a>Directory Picker Only</a> mode.</p>
+      
+         
 
         <section>
           <h2>Form Submission</h2>
