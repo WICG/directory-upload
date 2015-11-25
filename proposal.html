@@ -80,8 +80,8 @@
     </section>
     <section>
       <h3>The Temporary Directory Tree</h3>
-      <p>In this specification, a <dfn>temporary directory tree</dfn> consists of <a href="#directoryConcept">directories</a> and <a href="#fileConcept">file</a>s, along with the affiliated <a>path from root</a>, for each <a href="#directoryConcept">directory</a> and <a href="#fileConcept">file</a> that the user has selected from the underlying OS filesystem; each such <a href="#directoryConcept">directory</a> or <a href="#fileConcept">file</a> must correspond to a node in the <a>temporary directory tree</a>, with the top-most <a href="#directoryConcept">directory</a> being the <a href="#directoryConcept">directory</a> <em>from which</em> the user has made selections of <a href="#fileConcept">files</a> and <a href="#directoryConcept">directories</a>. </p>
-    <p>The <dfn>present working directory</dfn> is the node on the <a>temporary directory tree</a> that represents the current <a href="#directoryConcept">directory</a> from which an operation is taking place. In this specification, this is the <a href="#directoryConcept">directory</a> from which a <a><code>Directory</code></a> interface operation or attribute is called. </p>
+      <p>In this specification, a <dfn>temporary directory tree</dfn> consists of <a href="#directoryConcept">directories</a> and <a href="#fileConcept">file</a>s, along with the affiliated <a>path from root</a>, for each <a href="#directoryConcept">directory</a> and <a href="#fileConcept">file</a> that the user has selected from the underlying OS filesystem; each such <a href="#directoryConcept">directory</a> or <a href="#fileConcept">file</a> must correspond to a node in the <a>temporary directory tree</a>, with the top-most <a href="#directoryConcept">directory</a> being the <a href="#directoryConcept">directory</a> <em>from which</em> the user has made selections of <a href="#fileConcept">files</a> and <a href="#directoryConcept">directories</a> and an <a>immediate child</a> of the <a>root</a> of the temporary directory tree. </p>
+    <p>The <dfn>present working directory</dfn> is the node on the <a>temporary directory tree</a> that represents the current <a href="#directoryConcept">directory</a> from which an operation is taking place.  </p>
     <p>A <a>path</a> to a given <a href="#directoryConcept">directory</a> or <a href="#fileConcept">file</a> from the <a>root</a> <a href="#directoryConcept">directory</a> is said to be a <dfn>path from root</dfn> and starts with a leading "/" U+002F SOLIDUS character and ends with the name of the <a href="#fileConcept">file</a> or <a href="#directoryConcept">directory</a>. </p>
       <pre class="example highlight">
 /**
@@ -101,7 +101,16 @@ console.log(currentSelection.name);
 // output is "jazz"
  </pre>
 
+
 <p>A <dfn>child</dfn> is a node on the <a>temporary directory tree</a> with a position that is below a given position on the <a>temporary directory tree</a> for a given <a href="#directoryConcept">directory</a>; a <a href="#subdirectoryConcept">subdirectory</a> of the <a>present working directory</a> is a <a>child</a> of the <a>present working directory</a>; a <a href="#subdirectoryConcept">subdirectory</a> of <em>that</em> <a href="#subdirectoryConcept">subdirectory</a> is also a <a>child</a> of the <a>present working directory</a>. An <dfn>immediate child</dfn> corresponds to a node on the <a>temporary directory tree</a> that is either a <a href="#subdirectoryConcept">subdirectory</a> that is the next position on the <a>path</a>, or a <a href="#fileConcept">file</a> that is next on the <a>path</a>. A <dfn>parent</dfn> is a <a href="#directoryConcept">directory</a> that contains a <a href="#fileConcept">file</a> or another <a href="#directoryConcept">directory</a>; in particular, the <a href="#directoryConcept">directory</a> that contains the <a>present working directory</a> is its <a>parent</a>. The <a>root</a> <a href="#directoryConcept">directory</a> is the <a>parent</a> of all other nodes in the <a>temporary directory tree</a>.</p>
+<p>In this specification, <dfn>stat info</dfn> is said to be information that includes any of the following:</p>
+    <ul>
+      <li><p>Time stamp information such as last modified information on files, exposed through the <code>lastModified</code> property of <code>File</code> objects [[!FileAPI]].</p></li>
+      <li><p>Size information of files, exposed through the <code>size</code> property of <code>File</code> objects [[!FileAPI]]. </p></li>
+      <li><p>Type information of files, exposed through the <code>type</code> property of <code>File</code> objects [[!FileAPI]].</p></li>
+      <li><p>The name and path information of both files and directories, exposed through the <code>name</code> and <code>path</code> properties of <code>File</code> objects and <code>Directory</code> objects.</p></li>
+    </ul>
+<p>When this specification says to <dfn>add a node</dfn> <var>n</var> to a sequence <var>s</var> from the <a>temporary directory tree</a> this means to add a reference to <var>n</var> to <var>s</var> along with any <a>stat info</a>.</p>
 
     </section>
     <section>
@@ -114,11 +123,12 @@ console.log(currentSelection.name);
       <li><p>Run the following steps asynchronously:</p>
         <ol>
           <li><p>If the <a>present working directory</a> has no <a href="#fileConcept">files</a> or <a href="#directoryConcept">directories</a>, resolve <var>p</var> with <var>s</var>, which is still an empty sequence.</p></li>
-          <li><p>Otherwise, for each <a>immediate child</a> of the <a>present working directory</a>, add the corresponding node to <var>s</var> as a <a><code>File</code></a> or <a>Directory</a> object, depending on the type of the <a>immediate child</a>.</p></li>
+          <li><p>Otherwise, for each <a>immediate child</a> of the <a>present working directory</a>, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> or <a>Directory</a> object, depending on the type of the <a>immediate child</a>.</p></li>
           <li><p>If there are any problems retrieving any <a>immediate child</a>, reject <var>p</var> with an <code>InvalidStateError</code>.</p>
           <div class="note"><p>Promise rejection occurs for any problem crawling the <a>present working directory</a>.</p></div>  
           </li>
-          <li><p>Once all the <a>immediate child</a> nodes of the <a>present working directory</a> have been added to <var>s</var> as a <a><code>File</code></a> or <a><code>Directory</code></a>, resolve <var>p</var> with <var>s</var>.</p></li>
+          <li><p>Once all the <a>immediate child</a> nodes of the <a>present working directory</a> have been added to <var>s</var> as a <a><code>File</code></a> or <a><code>Directory</code></a>, resolve <var>p</var> with <var>s</var>.</p>
+          </li>
         </ol>
 
       </li>
@@ -128,11 +138,17 @@ console.log(currentSelection.name);
     </section>
     <section>
       <h3>Triggering a Directory Picker</h3>
-      <p>When an <code>input</code> element's <code>type</code> attribute is in the <a>File Upload</a> state, the rules in this section apply [[!HTML]].</p>
-      <p>User agents may surface a directory picker, which may also serve as a file picker; this is an unspecified piece of user interface that a user agent may deploy, and may expand upon any existing user interface already in place for selecting files when the <code>input</code> element's <code>type</code> attribute is in the <a>File Upload</a> state. This generally happens synchronously and is considered a blocking operation. When this specification says to <dfn>trigger a directory picker</dfn> a user agent must follow the steps below (and may optionally follow the steps labeled "may" [[!RFC2119]]): </p>
+      <p>When an <code>input</code> element's <code>type</code> attribute is in the <a>File Upload</a> state, the rules in this section apply [[!HTML]]. .</p>
+      <p>User agents may surface a directory picker, which may also serve as a file picker; this is an unspecified piece of user interface that a user agent may deploy upon receiving a click event, and may expand upon any existing user interface already in place for selecting files when the <code>input</code> element's <code>type</code> attribute is in the <a>File Upload</a> state. This generally happens synchronously and is considered a blocking operation. When this specification says to <dfn>trigger a directory picker</dfn> a user agent must follow the steps below (and optionally follow the steps labeled "may" [[!RFC2119]]): </p>
       <ol>
-        <li><p>If the result of running <a href="https://w3c.github.io/webappsec-secure-contexts/#settings-object">is settings object a secure context</a> with the <a href="https://html.spec.whatwg.org/multipage/webappapis.html#incumbent-settings-object">incumbent settings object</a> is <code>Not Secure</code>, the user agent must throw a <code>SecurityError</code> exception and additionally may prevent a directory picker from being shown at all. </p></li>
-        <li><p>If the user agent is capable of surfacing both a directory picker and a file picker in a single user interface element, this user agent is said to have a <dfn>Single File and Directory Picker</dfn>. This user agent must expose a value of <code>true</code> on the <a><code>isFilesAndDirectoriesSupported</code></a> attribute of the <a><code>HTMLInputElement</code></a>. </p>
+        <li><p>If the algorithm is not <dfn>allowed to show a popup</dfn> [[!HTML]] then abort these steps without doing anything else.</p></li>
+        <li><p>Return, but continue running these steps <dfn>in parallel</dfn> [[!HTML]].</p></li>
+        <li><p>Optionally, wait until any prior execution of this algorithm has terminated.</p></li>
+        <li><p>If the result of running <a href="https://w3c.github.io/webappsec-secure-contexts/#settings-object">is settings object a secure context</a> with the <a href="https://html.spec.whatwg.org/multipage/webappapis.html#incumbent-settings-object">incumbent settings object</a> is <code>Not Secure</code>, the user agent may prevent a directory picker from being shown at all. In this case, a user agent may run the steps for the File Upload state as if the <code>directory</code> attribute is not set, and exit from this algorithm.</p>
+        <div class="issue">It might be simpler to specify a Directory Upload state, alongside a File Upload state.</div>
+        </li>
+
+        <li><p>If the user agent is capable of surfacing both a directory picker and a file picker in a single user interface element, this user agent is said to have a <dfn>Single File and Directory Picker</dfn>. The <a><code>isFilesAndDirectoriesSupported</code></a> attribute of the <a><code>HTMLInputElement</code></a> must be set to <code>true</code>. </p>
         <p>User agents in practice may reuse user interface elements from the host OS. If the host OS supports a <a>Single File and Directory Picker</a> a file input with a single button that enables the combined picker may be rendered and may resemble the suggested user interface element below:</p>
             <figure>
               <div style="border: 1px solid #999; color: #444; font-size: 14px; width: 285px; height: 20px; line-height: 20px; padding: 5px 5px 5px 10px; text-align: left;">
@@ -170,6 +186,10 @@ console.log(currentSelection.name);
         </figure>  
 
         </li>
+        <li><p>Wait for the user to have made their selection.</p></li>
+        <li><p><dfn>Queue a task</dfn> [[!HTML]] to first update the element's selected files and directories so that it represents the user's selection as the <a>temporary directory tree</a>, then fire a simple event that bubbles named <code>input</code> at the <code>input</code> element, and finally fire a simple event that bubbles named <code>change</code> at the input element.</p>
+
+        </li>
       </ol>
 
     </section>  
@@ -180,10 +200,10 @@ console.log(currentSelection.name);
       <p>When an <code>input</code> element's type attribute is in the <dfn>File Upload</dfn> state, the rules in this section apply [[!HTML]].</p>
       <p>When the <code>input</code> element is in the <a>File Upload</a> state, it can represent two distinct types of user selections: 
         <ul>
-        <li><p>If the <a href="#directoryAttribute"><code>directory</code></a> attribute is NOT set, it represents a list of <em>only</em> the selected files, each file consisting of a file name, a file type, and a file body (the contents of the file). </p></li>
+        <li><p>If the <a href="#directoryAttribute"><code>directory</code></a> content attribute is NOT set, it represents a list of <em>only</em> the selected files, each file consisting of a file name, a file type, and a file body (the contents of the file). </p></li>
         <li><p>If the <a href="#directoryAttribute"><code>directory</code></a> attribute is set, it represents a sequence of <em>both</em> the selections of files and <a href="#directoryConcept">directories</a>.</li></p>
       </ul>
-      <p>The <dfn id="directoryAttribute"><code>directory</code></dfn> attribute is a boolean attribute [[!HTML]] that indicates whether a user is allowed the selection of both of <a href="#fileConcept">files</a> and <a href="#directoryConcept">directories</a>.</p>
+      <p>The <dfn id="directoryAttribute"><code>directory</code></dfn> content attribute is a boolean attribute [[!HTML]] that indicates whether a user is allowed the selection of both <a href="#fileConcept">files</a> and <a href="#directoryConcept">directories</a>; when set, a user agent that supports it must <a>trigger a directory picker</a>. </p>
     
 
     </section>
@@ -235,9 +255,9 @@ partial interface HTMLInputElement {
         </pre>
 
         <dfn>HTMLInputElement.directory</dfn>
-        <p>If the input <code>type</code> is &quot;file&quot; and the <a>HTMLInputElement.directory</a> attribute is set, the file input can accept directories in addition to files.
+        <p>On getting, the <a>HTMLInputElement.directory</a> IDL attribute must <dfn>reflect</dfn> the content <code>directory</code> attribute, and is <code>true</code> if the content <code>directory</code> attribute is set, and <code>false</code> otherwise.</p>
           <div class="note">Adding the <code>multiple</code> attribute does not change the behavior, however, it allows older browsers to make the file input accept multiple files instead of just one since they would not recognize the <a>HTMLInputElement.directory</a> attribute.</div>
-          If this attribute is set, <code>input.files</code> MUST return <code>null</code>.
+          <p>If this attribute is set, <code>input.files</code> MUST return <code>null</code>.</p>
           <div class="note">Due to this, <a>HTMLInputElement.getFilesAndDirectories</a> must be called to retrieve the chosen files and directories.</div>
             <pre class="example highlight" title="HTML">
               &lt;input type="file" id="fileInput" directory multiple />
@@ -256,9 +276,9 @@ partial interface HTMLInputElement {
         <dfn>HTMLInputElement.getFilesAndDirectories</dfn>
        <p>When the <code>getFilesAndDirectories()</code> method is called, the user agent must run the steps below:</p>
       <ol>
-        <li><p>Let <var>d</var> be the <a href="#directoryConcept">directory</a> on the underlying filesystem OS containing the user's selections of <a href="#fileConcept">files</a> and <a href="#directoryConcept">directories</a>. Set <var>d</var> to be the <a>present working directory</a> and an <a>immediate child</a> of the <a>root</a> <a href="#directoryConcept">directory</a> on the <a>temporary directory tree</a>. </p>
+        <li><p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a>. Set <var>d</var> to be the <a>present working directory</a>. </p>
         </li>
-        <li><p>Using <var>d</var> as the <a>present working directory</a> <a>return a file or directory sequence promise</a>.</p>
+        <li><p><a>Return a file or directory sequence promise</a> on <var>d</var>.</p>
         <div class="note">In order to retrieve all selections reliably, developers should call this method after the <code>change</code> event on <code>HTMLInputElement</code> has fired. Guidance in developer documentation here would be helpful.</div>
         </li>
       </ol>
@@ -285,7 +305,7 @@ partial interface HTMLInputElement {
             </pre>
 
         <dfn>HTMLInputElement.chooseDirectory</dfn>
-        <p>When the <code>choseDirectory()</code> method is called, a user agent must <a>trigger a directory picker</a> in <a>Directory Picker Only</a> mode.</p>
+        <p>When the <code>choseDirectory()</code> method is called, a user agent must <a>trigger a directory picker</a> in <a>Directory Picker Only</a> Model.</p>
       
          
 
@@ -329,9 +349,9 @@ partial interface DataTransfer {
         <dfn>DataTransfer.getFilesAndDirectories</dfn>
        <p>When the <code>getFilesAndDirectories()</code> method is called, the user agent must run the steps below:</p>
     <ol>
-        <li><p>Let <var>d</var> be the <a href="#directoryConcept">directory</a> on the underlying filesystem OS containing the user's selections of <a href="#fileConcept">files</a> and <a href="#directoryConcept">directories</a>. Set <var>d</var> to be the <a>present working directory</a> and an <a>immediate child</a> of the <a>root</a> <a href="#directoryConcept">directory</a> on the <a>temporary directory tree</a>. </p>
+        <li><p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a>. Set <var>d</var> to be the <a>present working directory</a>. </p>
         </li>
-        <li><p>Using <var>d</var> as the <a>present working directory</a> <a>return a file or directory sequence promise</a>.</p>
+        <li><a>Return a file or directory sequence promise</a> on <var>d</var>.</p>
         </li>
       </ol>
             <pre class="example highlight" title="JavaScript">
