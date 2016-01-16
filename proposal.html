@@ -277,7 +277,11 @@ interface Directory {
        <li><p>If the optional <dfn><code>recursiveFlag</code></dfn> parameter is set to <code>true</code>, then <a>return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>true</code>, using this <a href="#directoryConcept">directory</a> as the <a>present working directory</a>.</p></li>
        <li><p>Otherwise the <a><code>recursiveFlag</code></a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using this <a href="#directoryConcept">directory</a> as the <a>present working directory</a>.</p></li>
        </ol>
-    
+       <pre class="example highlight" title="JavaScript">
+        directory.getFiles(true).then(images => Promise.all(files.map(uploadImage))
+        .then(showDone)
+        .catch(err => console.error("Uploading failed!", err))
+       </pre>
       </section>
       <section>
         <h2>File Input</h2>
