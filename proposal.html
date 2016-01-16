@@ -116,7 +116,7 @@ console.log(currentSelection.name);
     <section>
     <h3>Returning Files and Directories</h3>
 
-    <p>When this specification says to <dfn>return a file or directory sequence promise</dfn> on a given <a>present working directory</a>, the user agent should run the following steps:</p>
+    <p>When this specification says to <dfn>return a file or directory sequence promise</dfn> on a given <a>present working directory</a>, the user agent must run the following steps:</p>
     <ol>
       <li><p>If the result of running <a href="https://w3c.github.io/webappsec-secure-contexts/#settings-object">is settings object a secure context</a> with the <a href="https://html.spec.whatwg.org/multipage/webappapis.html#incumbent-settings-object">incumbent settings object</a> is <code>Not Secure</code>, return a new promise rejected with a "<code>SecurityError</code>" exception.</p></li>
       <li><p>Let <var>p</var> be a new promise and <var>s</var> a sequence, initially set to an empty sequence.</p></li>
@@ -137,7 +137,36 @@ console.log(currentSelection.name);
     <div class="note"><p>A common method on both the <code>HTMLInputElement</code> and on the <code>Directory</code> interface called <code>getFilesAndDirectories()</code> returns <a href="#fileConcept">files</a> and <a href="#subdirectoryConcept">subdirectories</a> for a given <a href="#directoryConcept">directory</a> using the steps above. Each method invoking the steps above must specify what to consider as the <a>present working directory</a>. </p></div>
     </section>
     <section>
+    <h3>Returning A Flattened File List</h3>
+    <p>It is often convenient to simply return a flattened list of files from within the <a>temporary directory tree.</a> These can be from within the <a>present working directory</a> alone -- that is, only every <a>immediate child</a> of the <a>present working directory</a> that is a <a><code>File</code></a> -- or from the entirety of the tree, including subdirectories. This can be configured via the <dfn>recursive flag</dfn> which can be set to <code>true</code>; if <code>true</code> user agents must recurse through the entire <a>temporary directory tree</a> and return all the files. </p>
+    <p>When this specification says to <dfn>return a flattened file sequence promise</dfn> on a given <a>present working directory</a>, the user agent must run the following steps:</p>
+    <ol>
+    <li><p>If the result of running <a href="https://w3c.github.io/webappsec-secure-contexts/#settings-object">is settings object a secure context</a> with the <a href="https://html.spec.whatwg.org/multipage/webappapis.html#incumbent-settings-object">incumbent settings object</a> is <code>Not Secure</code>, return a new promise rejected with a "<code>SecurityError</code>" exception.</p></li>
+    <li><p>Let <var>p</var> be a new promise and <var>s</var> a sequence, initially set to an empty sequence.</p></li>
+    <li><p>Run the following steps asynchronously:</p>
+    <ol>
+      <li><p>If the <a>recursive flag</a> is set to <code>true</code>, follow the substeps below:</p>
+      <ol>
+          <li><p>For each <a>immediate child</a> of the <a>present working directory</a> that is also a file, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> object representing that file.</p></li>
+          <li><p>Recurse through all <a>child</a> nodes that are subdirectories of the <a>present working directory</a>. If any of these contain files, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> object representing that file.</p></li>
+          <li><p>If there are problems retrieving any file or adding a node for that file, reject <var>p</var> with an <code>InvalidStateError</code>.</p></li>
+          </ol></li>
+          
+          
+      <li><p>Otherwise, the <a>recursive flag</a> is set to <code>false</code>. For each <a>immediate child</a> of the <a>present working directory</a> that is a file, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> object representing that file. If there are problems retrieving any file or adding a node for that file, reject <var>p</var> with an <code>InvalidStateError</code>.</p></li>
+      <li><p>Resolve <var>p</var> with <var>s</var>.</p>
+      <div class="note"><p>If no files are found, <var>p</var> is still resolved with <var>s</var> which is still an empty sequence.</p></div>
+      </li>
+
+    </ol>
+    </li>
+    <li>Return <var>p</var>.</li>
+    </ol>
+
+    </section>
+    <section>
       <h3>Triggering a Directory Picker</h3>
+      <p>This section will eventually be a pull request to the HTML specification.</p>
       <p>When an <code>input</code> element's <code>type</code> attribute is in the <a>File Upload</a> state, the rules in this section apply [[!HTML]]. .</p>
       <p>User agents may surface a directory picker, which may also serve as a file picker; this is an unspecified piece of user interface that a user agent may deploy upon receiving a click event, and may expand upon any existing user interface already in place for selecting files when the <code>input</code> element's <code>type</code> attribute is in the <a>File Upload</a> state. This generally happens synchronously and is considered a blocking operation. When this specification says to <dfn>trigger a directory picker</dfn> a user agent must follow the steps below (and optionally follow the steps labeled "may" [[!RFC2119]]): </p>
       <ol>
@@ -218,6 +247,7 @@ interface Directory {
     readonly    attribute DOMString name;
     readonly    attribute DOMString path;
     Promise&lt;sequence&lt;(File or Directory)&gt;&gt; getFilesAndDirectories();
+    Promise&lt;sequence&lt;File&gt;&gt; getFiles(optional boolean <a>recursiveFlag</a>=false);
 };
         </pre>
         <dfn>Directory.name</dfn>
@@ -240,6 +270,13 @@ interface Directory {
 
         <dfn>Directory.getFilesAndDirectories</dfn>
        <p>When the <code>getFilesAndDirectories()</code> method is called, the user agent must <a>return a file or directory sequence promise</a> with this <a href="#directoryConcept">directory</a> as the <a>present working directory</a>.</p>
+       <dfn>Directory.getFiles</dfn>
+       <p>When the <code>getFiles()</code> method is called, the user agent must act as follows:</p>
+       <ol>
+
+       <li><p>If the optional <dfn><code>recursiveFlag</code></dfn> parameter is set to <code>true</code>, then <a>return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>true</code>, using this <a href="#directoryConcept">directory</a> as the <a>present working directory</a>.</p></li>
+       <li><p>Otherwise the <a><code>recursiveFlag</code></a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using this <a href="#directoryConcept">directory</a> as the <a>present working directory</a>.</p></li>
+       </ol>
     
       </section>
       <section>
@@ -249,8 +286,9 @@ interface Directory {
 partial interface HTMLInputElement {
                 attribute boolean directory;
     readonly    attribute boolean isFilesAndDirectoriesSupported;
-    Promise&lt;sequence&lt;(File or Directory)&gt;&gt; getFilesAndDirectories();
-    void                                   chooseDirectory();
+    Promise&lt;sequence&lt;(File or Directory)&gt;&gt;getFilesAndDirectories();
+    Promise&lt;sequence&lt;(File)&gt;&gt;getFiles(optional boolean <a>recursiveFlag</a>=false);
+    void chooseDirectory();
 };
         </pre>
 
@@ -276,7 +314,7 @@ partial interface HTMLInputElement {
         <dfn>HTMLInputElement.getFilesAndDirectories</dfn>
        <p>When the <code>getFilesAndDirectories()</code> method is called, the user agent must run the steps below:</p>
       <ol>
-        <li><p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a>. Set <var>d</var> to be the <a>present working directory</a>. </p>
+        <li><p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a> representing the directory from which the user has made selections of files and directories. Set <var>d</var> to be the <a>present working directory</a>. </p>
         </li>
         <li><p><a>Return a file or directory sequence promise</a> on <var>d</var>.</p>
         <div class="note">In order to retrieve all selections reliably, developers should call this method after the <code>change</code> event on <code>HTMLInputElement</code> has fired. Guidance in developer documentation here would be helpful.</div>
@@ -303,6 +341,14 @@ partial interface HTMLInputElement {
               }
             }
             </pre>
+
+            <dfn>HTMLInputElement.getFiles</dfn>
+            <p>When the <code>getFiles()</code> method is called, the user agent must run the steps below:</p>
+            <ol>
+            <li><p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a> representing the directory from which the user has made selections of files and directories. Set <var>d</var> to be the <a>present working directory</a>.</p></li>
+            <li><p>If the optional <a><code>recursiveFlag</code></a> parameter is set to <code>true</code>, then <a>return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>true</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
+       <li><p>Otherwise the <a><code>recursiveFlag</code></a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
+            </ol> 
 
         <dfn>HTMLInputElement.chooseDirectory</dfn>
         <p>When the <code>choseDirectory()</code> method is called, a user agent must <a>trigger a directory picker</a> in <a>Directory Picker Only</a> Model.</p>
