@@ -394,6 +394,7 @@ Content-Type: text/plain
 <pre class="idl">
 partial interface DataTransfer {
     Promise&lt;sequence&lt;(File or Directory)&gt;&gt; getFilesAndDirectories();
+    Promise&lt;sequence&lt;File&gt;&gt; getFiles(optional boolean <a>recursiveFlag</a>=false);
 };
 </pre>
         <dfn>DataTransfer.getFilesAndDirectories</dfn>
@@ -437,6 +438,13 @@ partial interface DataTransfer {
                   }
               });
             </pre>
+            <dfn>DataTransfer.getFiles</dfn>
+            <p>When the <code>getFiles()</code> method is called, the user agent must run the steps below:</p>
+            <ol>
+            <li><p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a> representing the directory from which the user has made selections of files and directories and which the user has dragged and dropped. Set <var>d</var> to be the <a>present working directory</a>.</p></li>
+            <li><p>If the optional <a><code>recursiveFlag</code></a> parameter is set to <code>true</code>, then <a>return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>true</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
+       <li><p>Otherwise the <a><code>recursiveFlag</code></a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
+            </ol> 
       </section>
     </section>
     <section class="informative">
