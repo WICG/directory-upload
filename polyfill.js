@@ -5,7 +5,7 @@
 (function() {
 	// Do not proceed with the polyfill if Directory interface is already natively available,
 	// or if webkitdirectory is not supported (i.e. not Chrome, since the polyfill only works in Chrome)
-	if (window.Directory || !('webkitdirectory' in document.createElement('input'))) {
+	if (window.Directory || !('webkitdirectory' in document.createElement('input') && 'webkitGetAsEntry' in DataTransferItem.prototype)) {
 		return;
 	}
 
