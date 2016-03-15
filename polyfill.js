@@ -285,13 +285,13 @@
 	 **** Drag and drop ****
 	 ***********************/
 	// keep a reference to the original method
-	var _addEventListener = Element.prototype.addEventListener;
+	var _addEventListener = EventTarget.prototype.addEventListener;
 
 	DataTransfer.prototype[getFilesMethod] = function() {
 		return Promise.resolve([]);
 	};
 
-	Element.prototype.addEventListener = function(type, listener, useCapture) {
+	EventTarget.prototype.addEventListener = function(type, listener, useCapture) {
 		if (type === 'drop') {
 			var _listener = listener;
 
