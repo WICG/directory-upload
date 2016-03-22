@@ -36,7 +36,6 @@
       <section>
         <h2>Background</h2>
         <p>Websites are currently able to provide functionality for uploading files by using <code class="hightlight">&lt;input type="file" multiple></code> and drag and drop. However, there currently is no standard solution to handle directories and cases that involve a mix of files and directories. This spec will provide the necessary mechanisms to enable directory uploading.</p>
-        
       </section>
       <section>
         <h2>Scenarios</h2>
@@ -54,174 +53,157 @@
       <h2>Model</h2>
       <section>
         <h3>Directory, File, Root, and Path</h3>
-      <p>In this specification, a <dfn id="directoryConcept">directory</dfn> is a logical organizing storage unit with a distinct <dfn>name</dfn> which contains <a href="#fileConcept">files</a> and/or one or more <dfn id="subdirectoryConcept">subdirectory</dfn> units (which are themselves <a href="#directoryConcept">directories</a>). A <a href="#directoryConcept">directory</a> corresponds to the same concept from the underlying OS filesystem, which is also called a <em>folder</em> on some underlying OS filesystems. A <dfn id="fileConcept">file</dfn> is <em>durable binary data</em> retrieved from the underlying OS filesystem, and can be programmatically manipulated by web applications as defined in the [[!FileAPI]]. In this specification, <a href="#fileConcept">files</a> and <a href="#directoryConcept">directories</a> which are selected by the user are represented by a <a>temporary directory tree</a>. <a href="fileConcept">Files</a> and <a href="#directoryConcept">directories</a> selected by the user have a position on the <a>temporary directory tree</a> that can be represented by a string, called a <dfn>path</dfn>. The <a>path</a> string uses the U+002F SOLIDUS character ("/") to denote directory hierarchy within the <a>temporary directory tree</a>.  <a href="#fileConcept">Files</a>, like <a href="#directoryConcept">directories</a>, have distinct <a>name</a>s and <a>path</a>s which identify them on a <a>temporary directory tree</a>. </p>
-      <p> The top-most containing <a href="#directoryConcept">directory</a>, which contains all <a href="#directoryConcept">directories</a> and <a href="#fileConcept">files</a>, if any exist, is called the <dfn>root</dfn> <a href="#directoryConcept">directory</a>, and has the following properties:</p> 
-    <ul>
-      <li><p>It is not contained by any other <a href="#directoryConcept">directory</a> in the <a>temporary directory tree</a>; it contains all others. It is the <em>root</em> of the <a>temporary directory tree</a>. </p></li>
-      <li><p>It is represented by a <a>path</a> that is equal to a single "/" U+002F SOLIDUS.</p>
-      </li>
-      <li><p>The <a href="#directoryConcept">directory</a> <em>from which</em> a user makes selections of <a href="#fileConcept">files</a> and <a href="#subdirectoryConcept">subdirectories</a> is considered an <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a> and has a <a>path</a> that is equal to a single "/" U+002F SOLIDUS concatenated with its name.</p>
-      <pre class="example highlight">
-        /**
+        <p>In this specification, a <dfn data-lt-noDefault data-lt="directory-concept">directory</dfn> is a logical organizing storage unit with a distinct <dfn>name</dfn> which contains <a data-lt="file-concept">files</a> and/or one or more <dfn data-lt="subdirectory-concept">subdirectory</dfn> units (which are themselves <a data-lt-noDefault data-lt="directory-concept">directories</a>). A <a data-lt-noDefault data-lt="directory-concept">directory</a> corresponds to the same concept from the underlying OS filesystem, which is also called a <em>folder</em> on some underlying OS filesystems. A <dfn data-lt="file-concept">file</dfn> is <em>durable binary data</em> retrieved from the underlying OS filesystem, and can be programmatically manipulated by web applications as defined in the [[!FileAPI]]. In this specification, <a data-lt="file-concept">files</a> and <a data-lt-noDefault data-lt="directory-concept">directories</a> which are selected by the user are represented by a <a>temporary directory tree</a>. <a href="file-concept">Files</a> and <a data-lt-noDefault data-lt="directory-concept">directories</a> selected by the user have a position on the <a>temporary directory tree</a> that can be represented by a string, called a <dfn>path</dfn>. The <a>path</a> string uses the U+002F SOLIDUS character ("/") to denote directory hierarchy within the <a>temporary directory tree</a>.  <a data-lt="file-concept">Files</a>, like <a data-lt-noDefault data-lt="directory-concept">directories</a>, have distinct <a>name</a>s and <a>path</a>s which identify them on a <a>temporary directory tree</a>.</p>
+        <p>The top-most containing <a data-lt-noDefault data-lt="directory-concept">directory</a>, which contains all <a data-lt-noDefault data-lt="directory-concept">directories</a> and <a data-lt="file-concept">files</a>, if any exist, is called the <dfn>root</dfn> <a data-lt-noDefault data-lt="directory-concept">directory</a>, and has the following properties:</p> 
+        <ul>
+          <li><p>It is not contained by any other <a data-lt-noDefault data-lt="directory-concept">directory</a> in the <a>temporary directory tree</a>; it contains all others. It is the <em>root</em> of the <a>temporary directory tree</a>.</p></li>
+          <li><p>It is represented by a <a>path</a> that is equal to a single "/" U+002F SOLIDUS.</p></li>
+          <li>
+            <p>The <a data-lt-noDefault data-lt="directory-concept">directory</a> <em>from which</em> a user makes selections of <a data-lt="file-concept">files</a> and <a data-lt="subdirectory-concept">subdirectories</a> is considered an <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a> and has a <a>path</a> that is equal to a single "/" U+002F SOLIDUS concatenated with its name.</p>
+            <pre class="example highlight">
+              /**
+                 The user picks items from a directory called 'music' 
+                 which is the top-most selection and an 
+                 immediate child of "/"
+              **/
 
-           The user picks items from a directory called 'music' 
-           which is the top-most selection and an 
-           immediate child of "/"
-        
-        **/
+              console.log(selection.path);     // output is "/music"
+            </pre>
+          </li>
+        </ul>
+      </section>
+      <section>
+        <h3>The Temporary Directory Tree</h3>
+        <p>In this specification, a <dfn>temporary directory tree</dfn> consists of <a data-lt-noDefault data-lt="directory-concept">directories</a> and <a data-lt="file-concept">file</a>s, along with the affiliated <a>path from root</a>, for each <a data-lt-noDefault data-lt="directory-concept">directory</a> and <a data-lt="file-concept">file</a> that the user has selected from the underlying OS filesystem; each such <a data-lt-noDefault data-lt="directory-concept">directory</a> or <a data-lt="file-concept">file</a> must correspond to a node in the <a>temporary directory tree</a>, with the top-most <a data-lt-noDefault data-lt="directory-concept">directory</a> being the <a data-lt-noDefault data-lt="directory-concept">directory</a> <em>from which</em> the user has made selections of <a data-lt="file-concept">files</a> and <a data-lt-noDefault data-lt="directory-concept">directories</a> and an <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a>.</p>
+        <p>The <dfn>present working directory</dfn> is the node on the <a>temporary directory tree</a> that represents the current <a data-lt-noDefault data-lt="directory-concept">directory</a> from which an operation is taking place.  </p>
+        <p>A <a>path</a> to a given <a data-lt-noDefault data-lt="directory-concept">directory</a> or <a data-lt="file-concept">file</a> from the <a>root</a> <a data-lt-noDefault data-lt="directory-concept">directory</a> is said to be a <dfn>path from root</dfn> and starts with a leading "/" U+002F SOLIDUS character and ends with the name of the <a data-lt="file-concept">file</a> or <a data-lt-noDefault data-lt="directory-concept">directory</a>.</p>
+        <pre class="example highlight">
+          /**
+            path from root of the 'jazz' directory, with 'music' 
+            being the directory from which the user has made 
+            selections of files and directories.
+          **/
 
-        console.log(selection.path); 
+          console.log(currentSelection.path);  // output is "/music/genres/jazz"; 
 
-        // output is "/music"
-      </pre>
-      </li>
-    </ul>
-    
-    </section>
-    <section>
-      <h3>The Temporary Directory Tree</h3>
-      <p>In this specification, a <dfn>temporary directory tree</dfn> consists of <a href="#directoryConcept">directories</a> and <a href="#fileConcept">file</a>s, along with the affiliated <a>path from root</a>, for each <a href="#directoryConcept">directory</a> and <a href="#fileConcept">file</a> that the user has selected from the underlying OS filesystem; each such <a href="#directoryConcept">directory</a> or <a href="#fileConcept">file</a> must correspond to a node in the <a>temporary directory tree</a>, with the top-most <a href="#directoryConcept">directory</a> being the <a href="#directoryConcept">directory</a> <em>from which</em> the user has made selections of <a href="#fileConcept">files</a> and <a href="#directoryConcept">directories</a> and an <a>immediate child</a> of the <a>root</a> of the temporary directory tree. </p>
-    <p>The <dfn>present working directory</dfn> is the node on the <a>temporary directory tree</a> that represents the current <a href="#directoryConcept">directory</a> from which an operation is taking place.  </p>
-    <p>A <a>path</a> to a given <a href="#directoryConcept">directory</a> or <a href="#fileConcept">file</a> from the <a>root</a> <a href="#directoryConcept">directory</a> is said to be a <dfn>path from root</dfn> and starts with a leading "/" U+002F SOLIDUS character and ends with the name of the <a href="#fileConcept">file</a> or <a href="#directoryConcept">directory</a>. </p>
-      <pre class="example highlight">
-/**
+          console.log(currentSelection.name);  // output is "jazz"
+        </pre>
 
-  path from root of the 'jazz' directory, with 'music' 
-  being the directory from which the user has made 
-  selections of files and directories.  
-
-**/
-
-console.log(currentSelection.path);
-
-// output is "/music/genres/jazz"; 
-
-console.log(currentSelection.name);
-
-// output is "jazz"
- </pre>
-
-
-<p>A <dfn>child</dfn> is a node on the <a>temporary directory tree</a> with a position that is below a given position on the <a>temporary directory tree</a> for a given <a href="#directoryConcept">directory</a>; a <a href="#subdirectoryConcept">subdirectory</a> of the <a>present working directory</a> is a <a>child</a> of the <a>present working directory</a>; a <a href="#subdirectoryConcept">subdirectory</a> of <em>that</em> <a href="#subdirectoryConcept">subdirectory</a> is also a <a>child</a> of the <a>present working directory</a>. An <dfn>immediate child</dfn> corresponds to a node on the <a>temporary directory tree</a> that is either a <a href="#subdirectoryConcept">subdirectory</a> that is the next position on the <a>path</a>, or a <a href="#fileConcept">file</a> that is next on the <a>path</a>. A <dfn>parent</dfn> is a <a href="#directoryConcept">directory</a> that contains a <a href="#fileConcept">file</a> or another <a href="#directoryConcept">directory</a>; in particular, the <a href="#directoryConcept">directory</a> that contains the <a>present working directory</a> is its <a>parent</a>. The <a>root</a> <a href="#directoryConcept">directory</a> is the <a>parent</a> of all other nodes in the <a>temporary directory tree</a>.</p>
-<p>In this specification, <dfn>stat info</dfn> is said to be information that includes any of the following:</p>
-    <ul>
-      <li><p>Time stamp information such as last modified information on files, exposed through the <code>lastModified</code> property of <code>File</code> objects [[!FileAPI]].</p></li>
-      <li><p>Size information of files, exposed through the <code>size</code> property of <code>File</code> objects [[!FileAPI]]. </p></li>
-      <li><p>Type information of files, exposed through the <code>type</code> property of <code>File</code> objects [[!FileAPI]].</p></li>
-      <li><p>The name and path information of both files and directories, exposed through the <code>name</code> and <code>path</code> properties of <code>File</code> objects and <code>Directory</code> objects.</p></li>
-    </ul>
-<p>When this specification says to <dfn>add a node</dfn> <var>n</var> to a sequence <var>s</var> from the <a>temporary directory tree</a> this means to add a reference to <var>n</var> to <var>s</var> along with any <a>stat info</a>.</p>
-
-    </section>
-    <section>
-    <h3>Returning Files and Directories</h3>
-
-    <p>When this specification says to <dfn>return a file or directory sequence promise</dfn> on a given <a>present working directory</a>, the user agent must run the following steps:</p>
-    <ol>
-      <li><p>If the result of running <a href="https://w3c.github.io/webappsec-secure-contexts/#settings-object">is settings object a secure context</a> with the <a href="https://html.spec.whatwg.org/multipage/webappapis.html#incumbent-settings-object">incumbent settings object</a> is <code>Not Secure</code>, return a new promise rejected with a "<code>SecurityError</code>" exception.</p></li>
-      <li><p>Let <var>p</var> be a new promise and <var>s</var> a sequence, initially set to an empty sequence.</p></li>
-      <li><p>Run the following steps asynchronously:</p>
+        <p>A <dfn>child</dfn> is a node on the <a>temporary directory tree</a> with a position that is below a given position on the <a>temporary directory tree</a> for a given <a data-lt-noDefault data-lt="directory-concept">directory</a>; a <a data-lt="subdirectory-concept">subdirectory</a> of the <a>present working directory</a> is a <a>child</a> of the <a>present working directory</a>; a <a data-lt="subdirectory-concept">subdirectory</a> of <em>that</em> <a data-lt="subdirectory-concept">subdirectory</a> is also a <a>child</a> of the <a>present working directory</a>. An <dfn>immediate child</dfn> corresponds to a node on the <a>temporary directory tree</a> that is either a <a data-lt="subdirectory-concept">subdirectory</a> that is the next position on the <a>path</a>, or a <a data-lt="file-concept">file</a> that is next on the <a>path</a>. A <dfn>parent</dfn> is a <a data-lt-noDefault data-lt="directory-concept">directory</a> that contains a <a data-lt="file-concept">file</a> or another <a data-lt-noDefault data-lt="directory-concept">directory</a>; in particular, the <a data-lt-noDefault data-lt="directory-concept">directory</a> that contains the <a>present working directory</a> is its <a>parent</a>. The <a>root</a> <a data-lt-noDefault data-lt="directory-concept">directory</a> is the <a>parent</a> of all other nodes in the <a>temporary directory tree</a>.</p>
+        <p>In this specification, <dfn>stat info</dfn> is said to be information that includes any of the following:</p>
+        <ul>
+          <li><p>Time stamp information such as last modified information on files, exposed through the <code>lastModified</code> property of <code>File</code> objects [[!FileAPI]].</p></li>
+          <li><p>Size information of files, exposed through the <code>size</code> property of <code>File</code> objects [[!FileAPI]].</p></li>
+          <li><p>Type information of files, exposed through the <code>type</code> property of <code>File</code> objects [[!FileAPI]].</p></li>
+          <li><p>The name and path information of both files and directories, exposed through the <code>name</code> and <code>path</code> properties of <code>File</code> objects and <code>Directory</code> objects.</p></li>
+        </ul>
+        <p>When this specification says to <dfn>add a node</dfn> <var>n</var> to a sequence <var>s</var> from the <a>temporary directory tree</a> this means to add a reference to <var>n</var> to <var>s</var> along with any <a>stat info</a>.</p>
+      </section>
+      <section>
+        <h3>Returning Files and Directories</h3>
+        <p>When this specification says to <dfn>return a file or directory sequence promise</dfn> on a given <a>present working directory</a>, the user agent must run the following steps:</p>
         <ol>
-          <li><p>If the <a>present working directory</a> has no <a href="#fileConcept">files</a> or <a href="#directoryConcept">directories</a>, resolve <var>p</var> with <var>s</var>, which is still an empty sequence.</p></li>
-          <li><p>Otherwise, for each <a>immediate child</a> of the <a>present working directory</a>, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> or <a>Directory</a> object, depending on the type of the <a>immediate child</a>.</p></li>
-          <li><p>If there are any problems retrieving any <a>immediate child</a>, reject <var>p</var> with an <code>InvalidStateError</code>.</p>
-          <div class="note"><p>Promise rejection occurs for any problem crawling the <a>present working directory</a>.</p></div>  
+          <li><p>If the result of running <a href="https://w3c.github.io/webappsec-secure-contexts/#settings-object">is settings object a secure context</a> with the <a href="https://html.spec.whatwg.org/multipage/webappapis.html#incumbent-settings-object">incumbent settings object</a> is <code>Not Secure</code>, return a new promise rejected with a "<code>SecurityError</code>" exception.</p></li>
+          <li><p>Let <var>p</var> be a new promise and <var>s</var> a sequence, initially set to an empty sequence.</p></li>
+          <li>
+            <p>Run the following steps asynchronously:</p>
+            <ol>
+              <li><p>If the <a>present working directory</a> has no <a data-lt="file-concept">files</a> or <a data-lt-noDefault data-lt="directory-concept">directories</a>, resolve <var>p</var> with <var>s</var>, which is still an empty sequence.</p></li>
+              <li><p>Otherwise, for each <a>immediate child</a> of the <a>present working directory</a>, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> or <a>Directory</a> object, depending on the type of the <a>immediate child</a>.</p></li>
+              <li><p>If there are any problems retrieving any <a>immediate child</a>, reject <var>p</var> with an <code>InvalidStateError</code>.</p>
+              <div class="note"><p>Promise rejection occurs for any problem crawling the <a>present working directory</a>.</p></div>  
+              </li>
+              <li><p>Once all the <a>immediate child</a> nodes of the <a>present working directory</a> have been added to <var>s</var> as a <a><code>File</code></a> or <a><code>Directory</code></a>, resolve <var>p</var> with <var>s</var>.</p>
+              </li>
+            </ol>
           </li>
-          <li><p>Once all the <a>immediate child</a> nodes of the <a>present working directory</a> have been added to <var>s</var> as a <a><code>File</code></a> or <a><code>Directory</code></a>, resolve <var>p</var> with <var>s</var>.</p>
-          </li>
+          <li><p>Return <var>p</var>.</p></li>
         </ol>
-
-      </li>
-      <li><p>Return <var>p</var>.</p></li>
-    </ol>
-    <div class="note"><p>A common method on both the <code>HTMLInputElement</code> and on the <code>Directory</code> interface called <code>getFilesAndDirectories()</code> returns <a href="#fileConcept">files</a> and <a href="#subdirectoryConcept">subdirectories</a> for a given <a href="#directoryConcept">directory</a> using the steps above. Each method invoking the steps above must specify what to consider as the <a>present working directory</a>. </p></div>
-    </section>
-    <section>
-    <h3>Returning A Flattened File List</h3>
-    <p>It is often convenient to simply return a flattened list of files from within the <a>temporary directory tree.</a> These can be from within the <a>present working directory</a> alone -- that is, only every <a>immediate child</a> of the <a>present working directory</a> that is a <a><code>File</code></a> -- or from the entirety of the tree, including subdirectories. This can be configured via the <dfn>recursive flag</dfn> which can be set to <code>true</code>; if <code>true</code> user agents must recurse through the entire <a>temporary directory tree</a> and return all the files. </p>
-    <p>When this specification says to <dfn>return a flattened file sequence promise</dfn> on a given <a>present working directory</a>, the user agent must run the following steps:</p>
-    <ol>
-    <li><p>If the result of running <a href="https://w3c.github.io/webappsec-secure-contexts/#settings-object">is settings object a secure context</a> with the <a href="https://html.spec.whatwg.org/multipage/webappapis.html#incumbent-settings-object">incumbent settings object</a> is <code>Not Secure</code>, return a new promise rejected with a "<code>SecurityError</code>" exception.</p></li>
-    <li><p>Let <var>p</var> be a new promise and <var>s</var> a sequence, initially set to an empty sequence.</p></li>
-    <li><p>Run the following steps asynchronously:</p>
-    <ol>
-      <li><p>If the <a>recursive flag</a> is set to <code>true</code>, follow the substeps below:</p>
-      <ol>
-          <li><p>For each <a>immediate child</a> of the <a>present working directory</a> that is also a file, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> object representing that file.</p></li>
-          <li><p>Recurse through all <a>child</a> nodes that are subdirectories of the <a>present working directory</a>. If any of these contain files, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> object representing that file.</p></li>
-          <li><p>If there are problems retrieving any file or adding a node for that file, reject <var>p</var> with an <code>InvalidStateError</code>.</p></li>
-          </ol></li>
-          
-          
-      <li><p>Otherwise, the <a>recursive flag</a> is set to <code>false</code>. For each <a>immediate child</a> of the <a>present working directory</a> that is a file, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> object representing that file. If there are problems retrieving any file or adding a node for that file, reject <var>p</var> with an <code>InvalidStateError</code>.</p></li>
-      <li><p>Resolve <var>p</var> with <var>s</var>.</p>
-      <div class="note"><p>If no files are found, <var>p</var> is still resolved with <var>s</var> which is still an empty sequence.</p></div>
-      </li>
-
-    </ol>
-    </li>
-    <li>Return <var>p</var>.</li>
-    </ol>
-
-    </section>
-    <section>
-      <h3>Triggering a Directory Picker</h3>
-      <p>This section will eventually be a pull request to the HTML specification.</p>
-      <p>When an <code>input</code> element's <code>type</code> attribute is in the <a>File Upload</a> state, the rules in this section apply [[!HTML]]. .</p>
-      <p>User agents may surface a directory picker, which may also serve as a file picker; this is an unspecified piece of user interface that a user agent may deploy upon receiving a click event, and may expand upon any existing user interface already in place for selecting files when the <code>input</code> element's <code>type</code> attribute is in the <a>File Upload</a> state. This generally happens synchronously and is considered a blocking operation. When this specification says to <dfn>trigger a directory picker</dfn> a user agent must follow the steps below (and optionally follow the steps labeled "may" [[!RFC2119]]): </p>
-      <ol>
-        <li><p>If the algorithm is not <dfn>allowed to show a popup</dfn> [[!HTML]] then abort these steps without doing anything else.</p></li>
-        <li><p>Return, but continue running these steps <dfn>in parallel</dfn> [[!HTML]].</p></li>
-        <li><p>Optionally, wait until any prior execution of this algorithm has terminated.</p></li>
-        <li><p>If the result of running <a href="https://w3c.github.io/webappsec-secure-contexts/#settings-object">is settings object a secure context</a> with the <a href="https://html.spec.whatwg.org/multipage/webappapis.html#incumbent-settings-object">incumbent settings object</a> is <code>Not Secure</code>, the user agent may prevent a directory picker from being shown at all. In this case, a user agent may run the steps for the File Upload state as if the <code>directory</code> attribute is not set, and exit from this algorithm.</p>
-        <div class="issue">It might be simpler to specify a Directory Upload state, alongside a File Upload state.</div>
-        </li>
-
-        <li><p>If the user agent is capable of surfacing both a directory picker and a file picker in a single user interface element, this user agent is said to have a <dfn>Single File and Directory Picker</dfn>. The <a><code>isFilesAndDirectoriesSupported</code></a> attribute of the <a><code>HTMLInputElement</code></a> must be set to <code>true</code>. </p>
-        <p>User agents in practice may reuse user interface elements from the host OS. If the host OS supports a <a>Single File and Directory Picker</a> a file input with a single button that enables the combined picker may be rendered and may resemble the suggested user interface element below:</p>
+        <div class="note"><p>A common method on both the <code>HTMLInputElement</code> and on the <code>Directory</code> interface called <code>getFilesAndDirectories()</code> returns <a data-lt="file-concept">files</a> and <a data-lt="subdirectory-concept">subdirectories</a> for a given <a data-lt-noDefault data-lt="directory-concept">directory</a> using the steps above. Each method invoking the steps above must specify what to consider as the <a>present working directory</a>.</p></div>
+      </section>
+      <section>
+        <h3>Returning A Flattened File List</h3>
+        <p>It is often convenient to simply return a flattened list of files from within the <a>temporary directory tree</a>. These can be from within the <a>present working directory</a> alone &ndash; that is, only every <a>immediate child</a> of the <a>present working directory</a> that is a <a><code>File</code></a> &ndash; or from the entirety of the tree, including subdirectories. This can be configured via the <dfn>recursive flag</dfn> which can be set to <code>true</code>; if <code>true</code> user agents must recurse through the entire <a>temporary directory tree</a> and return all the files.</p>
+        <p>When this specification says to <dfn>return a flattened file sequence promise</dfn> on a given <a>present working directory</a>, the user agent must run the following steps:</p>
+        <ol>
+          <li><p>If the result of running <a href="https://w3c.github.io/webappsec-secure-contexts/#settings-object">is settings object a secure context</a> with the <a href="https://html.spec.whatwg.org/multipage/webappapis.html#incumbent-settings-object">incumbent settings object</a> is <code>Not Secure</code>, return a new promise rejected with a "<code>SecurityError</code>" exception.</p></li>
+          <li><p>Let <var>p</var> be a new promise and <var>s</var> a sequence, initially set to an empty sequence.</p></li>
+          <li>
+            <p>Run the following steps asynchronously:</p>
+            <ol>
+              <li><p>If the <a>recursive flag</a> is set to <code>true</code>, follow the substeps below:</p>
+                <ol>
+                  <li><p>For each <a>immediate child</a> of the <a>present working directory</a> that is also a file, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> object representing that file.</p></li>
+                  <li><p>Recurse through all <a>child</a> nodes that are subdirectories of the <a>present working directory</a>. If any of these contain files, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> object representing that file.</p></li>
+                  <li><p>If there are problems retrieving any file or adding a node for that file, reject <var>p</var> with an <code>InvalidStateError</code>.</p></li>
+                </ol>
+              </li>
+              <li><p>Otherwise, the <a>recursive flag</a> is set to <code>false</code>. For each <a>immediate child</a> of the <a>present working directory</a> that is a file, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> object representing that file. If there are problems retrieving any file or adding a node for that file, reject <var>p</var> with an <code>InvalidStateError</code>.</p></li>
+              <li>
+                <p>Resolve <var>p</var> with <var>s</var>.</p>
+                <div class="note"><p>If no files are found, <var>p</var> is still resolved with <var>s</var> which is still an empty sequence.</p></div>
+              </li>
+            </ol>
+          </li>
+          <li>Return <var>p</var>.</li>
+        </ol>
+      </section>
+      <section>
+        <h3>Triggering a Directory Picker</h3>
+        <p>This section will eventually be a pull request to the HTML specification.</p>
+        <p>When an <code>input</code> element's <code>type</code> attribute is in the <a>File Upload</a> state, the rules in this section apply [[!HTML]]. .</p>
+        <p>User agents may surface a directory picker, which may also serve as a file picker; this is an unspecified piece of user interface that a user agent may deploy upon receiving a click event, and may expand upon any existing user interface already in place for selecting files when the <code>input</code> element's <code>type</code> attribute is in the <a>File Upload</a> state. This generally happens synchronously and is considered a blocking operation. When this specification says to <dfn>trigger a directory picker</dfn> a user agent must follow the steps below (and optionally follow the steps labeled "may" [[!RFC2119]]): </p>
+        <ol>
+          <li><p>If the algorithm is not <dfn>allowed to show a popup</dfn> [[!HTML]] then abort these steps without doing anything else.</p></li>
+          <li><p>Return, but continue running these steps <dfn>in parallel</dfn> [[!HTML]].</p></li>
+          <li><p>Optionally, wait until any prior execution of this algorithm has terminated.</p></li>
+          <li>
+            <p>If the result of running <a href="https://w3c.github.io/webappsec-secure-contexts/#settings-object">is settings object a secure context</a> with the <a href="https://html.spec.whatwg.org/multipage/webappapis.html#incumbent-settings-object">incumbent settings object</a> is <code>Not Secure</code>, the user agent may prevent a directory picker from being shown at all. In this case, a user agent may run the steps for the File Upload state as if the <a data-lt-noDefault data-lt="directory-attribute"><code>directory</code></a> attribute is not set, and exit from this algorithm.</p>
+            <div class="issue">It might be simpler to specify a Directory Upload state, alongside a File Upload state.</div>
+          </li>
+          <li>
+            <p>If the user agent is capable of surfacing both a directory picker and a file picker in a single user interface element, this user agent is said to have a <dfn>Single File and Directory Picker</dfn>. The <a><code>HTMLInputElement.isFilesAndDirectoriesSupported</code></a> attribute of the <a><code>HTMLInputElement</code></a> must be set to <code>true</code>.</p>
+            <p>User agents in practice may reuse user interface elements from the host OS. If the host OS supports a <a>Single File and Directory Picker</a> a file input with a single button that enables the combined picker may be rendered and may resemble the suggested user interface element below:</p>
             <figure>
-              <div style="border: 1px solid #999; color: #444; font-size: 14px; width: 285px; height: 20px; line-height: 20px; padding: 5px 5px 5px 10px; text-align: left;">
+              <div style="border: 1px solid #999; color: #444; font-size: 14px; width: 305px; height: 20px; line-height: 20px; padding: 5px 5px 5px 10px; text-align: left;">
                 1 file selected.
                 <div style="float: right; width: 132.5px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center;">Choose file(s)...</div>
               </div>
               <figcaption>Clicking &quot;Choose file(s)&quot; activates combined file &amp; directory picker.</figcaption>
             </figure>
             <div class="note"><p>Currently, only OSX exposes a unified picker.</p></div>
-
-        </li>
-        <li><p>If the user agent does not have a <a>Single File and Directory Picker</a> it is said to have <dfn>Distinct File and Directory Pickers</dfn>. This user agent must expose a value of <code>false</code> on the <a><code>isFilesAndDirectoriesSupported</code></a> attribute of the <a><code>HTMLInputElement</code></a>.</p>
-        <p>If the user agent has <a>Distinct File and Directory Pickers</a>, possibly reusing user interface elements from the host OS, a file input that enables two separate pickers (file and directory) via two different buttons may be rendered and may resemble the suggested user interface element below:</p>
+          </li>
+          <li>
+            <p>If the user agent does not have a <a>Single File and Directory Picker</a> it is said to have <dfn>Distinct File and Directory Pickers</dfn>. This user agent must expose a value of <code>false</code> on the <a><code>HTMLInputElement.isFilesAndDirectoriesSupported</code></a> attribute of the <a><code>HTMLInputElement</code></a>.</p>
+            <p>If the user agent has <a>Distinct File and Directory Pickers</a>, possibly reusing user interface elements from the host OS, a file input that enables two separate pickers (file and directory) via two different buttons may be rendered and may resemble the suggested user interface element below:</p>
             <figure>
-              <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px; width: 290px; height: 20px; line-height: 20px;">
-                <div style="float: left; width: 130px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center;">Choose files...</div>
-                <div style="float: left; width: 130px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center; margin-left: 5px;">Choose directories...</div>
+              <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px; width: 310px; height: 20px; line-height: 20px;">
+                <div style="float: left; width: 140px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center;">Choose files...</div>
+                <div style="float: left; width: 140px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center; margin-left: 5px;">Choose directories...</div>
               </div>
               <figcaption>Default (no selection)</figcaption>
             </figure>
             <figure>
-              <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px 5px 5px 10px; width: 285px; height: 20px; line-height: 20px; text-align: left;">
+              <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px 5px 5px 10px; width: 305px; height: 20px; line-height: 20px; text-align: left;">
                 2 files selected.
                 <div style="float: right; height: 13px; line-height: 13px; padding: 5px; font-weight: bold; font-size: 16px; color: #999;">&times;</div>
               </div>
-              <figcaption>After a selection has been made; clearing the field may reset it to <a href="#fig-default-no-selection"></a>.</figcaption>
+              <figcaption>After a selection has been made; clearing the field may reset it to the <a href="#fig-default-no-selection">default state</a>.</figcaption>
             </figure>
-        </li>
-        <li><p>If the user agent has <a>Distinct File and Directory Pickers</a> and is set to trigger in <dfn>Directory Picker Only</dfn> mode, it may only surface a picker that allows for directory picking, or it may surface a picker featuring two separate buttons as in <a href="#fig-default-no-selection">figure two above</a>. The suggested user interface element below may be used to surface an option to only pick directories:</p>
-        <figure>
-           <div style="border: 1px solid #999; color: #444; font-size: 14px; width: 285px; height: 20px; line-height: 20px; padding: 5px 5px 5px 10px; text-align: left;">
-          <div style="float: left; width: 132.5px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center; margin-left: 5px;">Choose directories...</div>
-        </div>
-          <figcaption>Clicking &quot;Choose directories...&quot; activates a directory picker only.</figcaption>
-        </figure>  
-
-        </li>
-        <li><p>Wait for the user to have made their selection.</p></li>
-        <li><p><dfn>Queue a task</dfn> [[!HTML]] to first update the element's selected files and directories so that it represents the user's selection as the <a>temporary directory tree</a>, then fire a simple event that bubbles named <code>input</code> at the <code>input</code> element, and finally fire a simple event that bubbles named <code>change</code> at the input element.</p>
-
-        </li>
-      </ol>
-
-    </section>  
+          </li>
+          <li>
+            <p>If the user agent has <a>Distinct File and Directory Pickers</a> and is set to trigger in <dfn>Directory Picker Only</dfn> mode, it may only surface a picker that allows for directory picking, or it may surface a picker featuring two separate buttons as in <a href="#fig-default-no-selection">Fig. 2 above</a>. The suggested user interface element below may be used to surface an option to only pick directories:</p>
+            <figure>
+              <div style="border: 1px solid #999; color: #444; font-size: 14px; width: 305px; height: 20px; line-height: 20px; padding: 5px 5px 5px 10px; text-align: left;">
+                <div style="float: right; width: 132.5px; height: 8px; line-height: 8px; padding: 5px; background-color: #eee; border: 1px solid #aaa; text-align: center; margin-left: 5px;">Choose directories...</div>
+              </div>
+              <figcaption>Clicking &quot;Choose directories&quot; activates a directory picker only.</figcaption>
+            </figure>
+          </li>
+          <li><p>Wait for the user to have made their selection.</p></li>
+          <li><p><dfn>Queue a task</dfn> [[!HTML]] to first update the element's selected files and directories so that it represents the user's selection as the <a>temporary directory tree</a>, then fire a simple event that bubbles named <code>input</code> at the <code>input</code> element, and finally fire a simple event that bubbles named <code>change</code> at the input element.</p></li>
+        </ol>
+      </section>
     </section>
     <section>
       <h2>Attributes</h2>
@@ -229,26 +211,24 @@ console.log(currentSelection.name);
       <p>When an <code>input</code> element's type attribute is in the <dfn>File Upload</dfn> state, the rules in this section apply [[!HTML]].</p>
       <p>When the <code>input</code> element is in the <a>File Upload</a> state, it can represent two distinct types of user selections: 
         <ul>
-        <li><p>If the <a href="#directoryAttribute"><code>directory</code></a> content attribute is NOT set, it represents a list of <em>only</em> the selected files, each file consisting of a file name, a file type, and a file body (the contents of the file). </p></li>
-        <li><p>If the <a href="#directoryAttribute"><code>directory</code></a> attribute is set, it represents a sequence of <em>both</em> the selections of files and <a href="#directoryConcept">directories</a>.</li></p>
+        <li><p>If the <a data-lt-noDefault data-lt="directory-attribute"><code>directory</code></a> content attribute is NOT set, it represents a list of <em>only</em> the selected files, each file consisting of a file name, a file type, and a file body (the contents of the file).</p></li>
+        <li><p>If the <a data-lt-noDefault data-lt="directory-attribute"><code>directory</code></a> attribute is set, it represents a sequence of <em>both</em> the selections of files and <a data-lt-noDefault data-lt="directory-concept">directories</a>.</li></p>
       </ul>
-      <p>The <dfn id="directoryAttribute"><code>directory</code></dfn> content attribute is a boolean attribute [[!HTML]] that indicates whether a user is allowed the selection of both <a href="#fileConcept">files</a> and <a href="#directoryConcept">directories</a>; when set, a user agent that supports it must <a>trigger a directory picker</a>. </p>
-    
-
+      <p>The <dfn data-lt-noDefault data-lt="directory-attribute"><code>directory</code></dfn> content attribute is a boolean attribute [[!HTML]] that indicates whether a user is allowed the selection of both <a data-lt="file-concept">files</a> and <a data-lt-noDefault data-lt="directory-concept">directories</a>; when set, a user agent that supports it must <a>trigger a directory picker</a>.</p>
     </section>
     <section>
       <h2>APIs</h2>
       <section>
         <h2>Directory Interface</h2>
-        <p>The <a>Directory</a> interface represents a <a href="#directoryConcept">directory</a> on the <a>Directory Tree</a>. Methods and attributes on a <a>Directory</a> interface must act as if it is the <a>present working directory</a>.</p>
+        <p>The <a>Directory</a> interface represents a <a data-lt-noDefault data-lt="directory-concept">directory</a> on the <a>temporary directory tree</a>. Methods and attributes on a <a>Directory</a> interface must act as if it is the <a>present working directory</a>.</p>
         <pre class="idl">
-[Exposed=(Window,Worker)]
-interface Directory {
-    readonly    attribute DOMString name;
-    readonly    attribute DOMString path;
-    Promise&lt;sequence&lt;(File or Directory)&gt;&gt; getFilesAndDirectories();
-    Promise&lt;sequence&lt;File&gt;&gt; getFiles(optional boolean <a>recursiveFlag</a>=false);
-};
+          [Exposed=(Window,Worker)]
+          interface Directory {
+              readonly    attribute DOMString name;
+              readonly    attribute DOMString path;
+              Promise&lt;sequence&lt;(File or Directory)&gt;&gt; getFilesAndDirectories();
+              Promise&lt;sequence&lt;File&gt;&gt; getFiles(optional boolean <a>recursiveFlag</a>=false);
+          };
         </pre>
         <dfn>Directory.name</dfn>
         <p>On getting, this attribute must return the name of the <a>present working directory</a>.</p>
@@ -258,128 +238,118 @@ interface Directory {
         <p>On getting, this attribute must return the <a>path from root</a> of the <a>present working directory</a>, including its <a>name</a>.</p>
         <pre class="example highlight">
           // path of directory jazz
-
           /music/genres/jazz
 
           // path of file milesDavis.mp3
-
           /music/genres/jazz/milesDavis.mp3
-
-
         </pre>
-
         <dfn>Directory.getFilesAndDirectories</dfn>
-       <p>When the <code>getFilesAndDirectories()</code> method is called, the user agent must <a>return a file or directory sequence promise</a> with this <a href="#directoryConcept">directory</a> as the <a>present working directory</a>.</p>
-       <dfn>Directory.getFiles</dfn>
-       <p>When the <code>getFiles()</code> method is called, the user agent must act as follows:</p>
-       <ol>
-
-       <li><p>If the optional <dfn><code>recursiveFlag</code></dfn> parameter is set to <code>true</code>, then <a>return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>true</code>, using this <a href="#directoryConcept">directory</a> as the <a>present working directory</a>.</p></li>
-       <li><p>Otherwise the <a><code>recursiveFlag</code></a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using this <a href="#directoryConcept">directory</a> as the <a>present working directory</a>.</p></li>
-       </ol>
-       <pre class="example highlight" title="JavaScript">
+        <p>When the <code>getFilesAndDirectories()</code> method is called, the user agent must <a>return a file or directory sequence promise</a> with this <a data-lt-noDefault data-lt="directory-concept">directory</a> as the <a>present working directory</a>.</p>
+        <dfn>Directory.getFiles</dfn>
+        <p>When the <code>getFiles()</code> method is called, the user agent must act as follows:</p>
+        <ol>
+          <li><p>If the optional <dfn><code>recursiveFlag</code></dfn> parameter is set to <code>true</code>, then <a>return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>true</code>, using this <a data-lt-noDefault data-lt="directory-concept">directory</a> as the <a>present working directory</a>.</p></li>
+          <li><p>Otherwise the <a><code>recursiveFlag</code></a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using this <a data-lt-noDefault data-lt="directory-concept">directory</a> as the <a>present working directory</a>.</p></li>
+        </ol>
+        <pre class="example highlight" title="JavaScript">
         directory.getFiles(true).then(images => Promise.all(files.map(uploadImage))
-        .then(showDone)
-        .catch(err => console.error("Uploading failed!", err))
-       </pre>
+          .then(showDone)
+          .catch(err => console.error("Uploading failed!", err));
+        </pre>
       </section>
       <section>
         <h2>File Input</h2>
         <p>More information about the <code>HTMLInputElement</code> interface can be found in the <a href="http://www.w3.org/html/wg/drafts/html/CR/forms.html#the-input-element">HTML5 spec</a>.</p>
         <pre class="idl">
-partial interface HTMLInputElement {
-                attribute boolean directory;
-    readonly    attribute boolean isFilesAndDirectoriesSupported;
-    Promise&lt;sequence&lt;(File or Directory)&gt;&gt;getFilesAndDirectories();
-    Promise&lt;sequence&lt;(File)&gt;&gt;getFiles(optional boolean <a>recursiveFlag</a>=false);
-    void chooseDirectory();
-};
+          partial interface HTMLInputElement {
+                          attribute boolean directory;
+              readonly    attribute boolean isFilesAndDirectoriesSupported;
+              Promise&lt;sequence&lt;(File or Directory)&gt;&gt;getFilesAndDirectories();
+              Promise&lt;sequence&lt;(File)&gt;&gt;getFiles(optional boolean <a>recursiveFlag</a>=false);
+              void chooseDirectory();
+          };
         </pre>
-
         <dfn>HTMLInputElement.directory</dfn>
         <p>On getting, the <a>HTMLInputElement.directory</a> IDL attribute must <dfn>reflect</dfn> the content <code>directory</code> attribute, and is <code>true</code> if the content <code>directory</code> attribute is set, and <code>false</code> otherwise.</p>
-          <div class="note">Adding the <code>multiple</code> attribute does not change the behavior, however, it allows older browsers to make the file input accept multiple files instead of just one since they would not recognize the <a>HTMLInputElement.directory</a> attribute.</div>
-          <p>If this attribute is set, <code>input.files</code> MUST return <code>null</code>.</p>
-          <div class="note">Due to this, <a>HTMLInputElement.getFilesAndDirectories</a> must be called to retrieve the chosen files and directories.</div>
-            <pre class="example highlight" title="HTML">
-              &lt;input type="file" id="fileInput" directory multiple />
-                    &lt;!-- Supports being able to select multiple files and/or directories -->
-                    &lt;!-- Adding the multiple attribute is useful because older browsers would be able -->
-                    &lt;!-- to accept multiple files even if they do not recognize the directory attribute -->
-            </pre>
-            
-            
-            
-            <p>The default click behavior of such a file input MUST trigger the file picker. Calling <a>HTMLInputElement.chooseDirectory</a> on the file input element MUST trigger the directory picker.</p>
+        <div class="note">Adding the <code>multiple</code> attribute does not change the behavior, however, it allows older browsers to make the file input accept multiple files instead of just one since they would not recognize the <a>HTMLInputElement.directory</a> attribute.</div>
+        <p>If this attribute is set, <code>input.files</code> MUST return <code>null</code>.</p>
+        <div class="note">Due to this, <a>HTMLInputElement.getFilesAndDirectories</a> must be called to retrieve the chosen files and directories.</div>
+        <pre class="example highlight" title="HTML">
+          &lt;input type="file" id="fileInput" directory multiple />
+            &lt;!-- Supports being able to select multiple files and/or directories -->
+            &lt;!-- Adding the multiple attribute is useful because older browsers would still be able -->
+            &lt;!-- to accept multiple files even though they do not recognize the directory attribute -->
+        </pre>
+          
+        <p>The default click behavior of such a file input MUST trigger the file picker. Calling <a>HTMLInputElement.chooseDirectory</a> on the file input element MUST trigger the directory picker.</p>
 
         <dfn>HTMLInputElement.isFilesAndDirectoriesSupported</dfn>
         <p>On getting, this attribute must be <code>true</code> if the user agent will expose a <a>Single File and Directory Picker</a>, and <code>false</code> if the user agent will expose <a>Distinct File and Directory Pickers</a>.</p>
 
         <dfn>HTMLInputElement.getFilesAndDirectories</dfn>
-       <p>When the <code>getFilesAndDirectories()</code> method is called, the user agent must run the steps below:</p>
-      <ol>
-        <li><p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a> representing the directory from which the user has made selections of files and directories. Set <var>d</var> to be the <a>present working directory</a>. </p>
-        </li>
-        <li><p><a>Return a file or directory sequence promise</a> on <var>d</var>.</p>
-        <div class="note">In order to retrieve all selections reliably, developers should call this method after the <code>change</code> event on <code>HTMLInputElement</code> has fired. Guidance in developer documentation here would be helpful.</div>
-        </li>
-      </ol>
-            <pre class="example highlight" title="JavaScript">
-            <!-- markup snippet might look like this -->
+        <p>When the <code>getFilesAndDirectories()</code> method is called, the user agent must run the steps below:</p>
+        <ol>
+          <li>
+            <p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a> representing the directory from which the user has made selections of files and directories. Set <var>d</var> to be the <a>present working directory</a>.</p>
+          </li>
+          <li>
+            <p><a>Return a file or directory sequence promise</a> on <var>d</var>.</p>
+            <div class="note">In order to retrieve all selections reliably, developers should call this method after the <code>change</code> event on <code>HTMLInputElement</code> has fired. Guidance in developer documentation here would be helpful.</div>
+          </li>
+        </ol>
+        <!-- markup snippet might look like this -->
+        <pre class="example highlight" title="HTML and JavaScript">
+          &lt;input id="fileInput" type="file" multiple directory
+            ondragover="alertLength(event);"
+            onchange="handleChangeEvent(event);"&gt;
 
-            &lt;input id='fileInput' type=file multiple directory
-             ondragover="alertLength(event);"
-             onchange="handleChangeEvent(event);"&gt;
+          &lt;script type="text/javascript"&gt;
+            function handleChangeEvent(e) {
+              // change event fires on input element
+              var input = document.getElementById('fileInput');
 
-              // Within a script block we handle change event
-
-              function handleChangeEvent(e){
-                // change event fires on input element
-                var input = document.getElementById('fileInput');
-
-                if ('getFilesAndDirectories' in input) {
-                  input.getFilesAndDirectories().then(function(filesAndDirs) {
-                      // iterate through each item
-                      // see drag and drop example below for more details
-                  });
+              if ('getFilesAndDirectories' in input) {
+                input.getFilesAndDirectories().then(function(filesAndDirs) {
+                  // iterate through each item
+                  // see drag and drop example below for more details
+                });
               }
             }
-            </pre>
+          &lt;/script&gt;
+        </pre>
 
-            <dfn>HTMLInputElement.getFiles</dfn>
-            <p>When the <code>getFiles()</code> method is called, the user agent must run the steps below:</p>
-            <ol>
-            <li><p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a> representing the directory from which the user has made selections of files and directories. Set <var>d</var> to be the <a>present working directory</a>.</p></li>
-            <li><p>If the optional <a><code>recursiveFlag</code></a> parameter is set to <code>true</code>, then <a>return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>true</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
-       <li><p>Otherwise the <a><code>recursiveFlag</code></a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
-            </ol> 
+        <dfn>HTMLInputElement.getFiles</dfn>
+        <p>When the <code>getFiles()</code> method is called, the user agent must run the steps below:</p>
+        <ol>
+          <li><p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a> representing the directory from which the user has made selections of files and directories. Set <var>d</var> to be the <a>present working directory</a>.</p></li>
+          <li><p>If the optional <a><code>recursiveFlag</code></a> parameter is set to <code>true</code>, then <a>return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>true</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
+          <li><p>Otherwise the <a><code>recursiveFlag</code></a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
+        </ol> 
 
         <dfn>HTMLInputElement.chooseDirectory</dfn>
         <p>When the <code>chooseDirectory()</code> method is called, a user agent must <a>trigger a directory picker</a> in <a>Directory Picker Only</a> Model.</p>
-      
-         
 
         <section>
           <h2>Form Submission</h2>
           <p>When a form is submitted with <code class="highlight">enctype="multipart/form-data"</code> and a file input with the <a>HTMLInputElement.directory</a> attribute (and a directory named &quot;docs&quot; was picked) it MUST adhere to the following pattern in its request payload:</p>
           <div class="issue">TODO: generate form submission output from <a>temporary directory tree</a>.</div>
           <pre class="example highlight">
-------Boundary
-Content-Disposition: form-data; name="file"; filename="/docs/1.txt"
-Content-Type: text/plain
+            ------Boundary
+            Content-Disposition: form-data; name="file"; filename="/docs/1.txt"
+            Content-Type: text/plain
 
-[DATA]
-------Boundary
-Content-Disposition: form-data; name="file"; filename="/docs/path/2.txt"
-Content-Type: text/plain
+            [DATA]
+            ------Boundary
+            Content-Disposition: form-data; name="file"; filename="/docs/path/2.txt"
+            Content-Type: text/plain
 
-[DATA]
-------Boundary
-Content-Disposition: form-data; name="file"; filename="/docs/path/to/3.txt"
-Content-Type: text/plain
+            [DATA]
+            ------Boundary
+            Content-Disposition: form-data; name="file"; filename="/docs/path/to/3.txt"
+            Content-Type: text/plain
 
-[DATA]
-------Boundary--
+            [DATA]
+            ------Boundary--
           </pre>
           <p>
             Directories that are empty MUST NOT be included in the request payload.
@@ -391,60 +361,58 @@ Content-Type: text/plain
         <h2>Drag and Drop</h2>
         <p>More information about the <code>DataTransfer</code> interface can be found in the <a href="http://www.w3.org/TR/2010/WD-html5-20101019/dnd.html#datatransfer">HTML5 spec</a>.</p>
         <p><code>DataTransfer</code>'s <code>files</code> attribute MUST continue to work with no changes to its behavior.</p>
-<pre class="idl">
-partial interface DataTransfer {
-    Promise&lt;sequence&lt;(File or Directory)&gt;&gt; getFilesAndDirectories();
-    Promise&lt;sequence&lt;File&gt;&gt; getFiles(optional boolean <a>recursiveFlag</a>=false);
-};
-</pre>
+        <pre class="idl">
+          partial interface DataTransfer {
+              Promise&lt;sequence&lt;(File or Directory)&gt;&gt; getFilesAndDirectories();
+              Promise&lt;sequence&lt;File&gt;&gt; getFiles(optional boolean <a>recursiveFlag</a>=false);
+          };
+        </pre>
         <dfn>DataTransfer.getFilesAndDirectories</dfn>
-       <p>When the <code>getFilesAndDirectories()</code> method is called, the user agent must run the steps below:</p>
-    <ol>
-        <li><p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a>. Set <var>d</var> to be the <a>present working directory</a>. </p>
-        </li>
-        <li><a>Return a file or directory sequence promise</a> on <var>d</var>.</p>
-        </li>
-      </ol>
-            <pre class="example highlight" title="JavaScript">
-              document.getElementById('dropDiv').addEventListener('drop', function(e) {
-                  e.stopPropagation();
-                  e.preventDefault();
+        <p>When the <code>getFilesAndDirectories()</code> method is called, the user agent must run the steps below:</p>
+        <ol>
+          <li><p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a>. Set <var>d</var> to be the <a>present working directory</a>.</p></li>
+          <li><a>Return a file or directory sequence promise</a> on <var>d</var>.</p></li>
+        </ol>
+        <pre class="example highlight" title="JavaScript">
+          document.getElementById('dropDiv').addEventListener('drop', function(e) {
+              e.stopPropagation();
+              e.preventDefault();
 
-                  var uploadFile = function(file, path) {
-                      // handle file uploading
-                  };
+              var uploadFile = function(file, path) {
+                  // handle file uploading
+              };
 
-                  var iterateFilesAndDirs = function(filesAndDirs, path) {
-                      for (var i = 0; i < filesAndDirs.length; i++) {
-                          if (typeof filesAndDirs[i].getFilesAndDirectories === 'function') {
-                              var path = filesAndDirs[i].path;
+              var iterateFilesAndDirs = function(filesAndDirs, path) {
+                  for (var i = 0; i < filesAndDirs.length; i++) {
+                      if (typeof filesAndDirs[i].getFilesAndDirectories === 'function') {
+                          var path = filesAndDirs[i].path;
 
-                              // this recursion enables deep traversal of directories
-                              filesAndDirs[i].getFilesAndDirectories().then(function(subFilesAndDirs) {
-                                  // iterate through files and directories in sub-directory
-                                  iterateFilesAndDirs(subFilesAndDirs, path);
-                              });
-                          } else {
-                              uploadFile(filesAndDirs[i], path);
-                          }
+                          // this recursion enables deep traversal of directories
+                          filesAndDirs[i].getFilesAndDirectories().then(function(subFilesAndDirs) {
+                              // iterate through files and directories in sub-directory
+                              iterateFilesAndDirs(subFilesAndDirs, path);
+                          });
+                      } else {
+                          uploadFile(filesAndDirs[i], path);
                       }
-                  };
-
-                  // begin by traversing the chosen files and directories
-                  if ('getFilesAndDirectories' in e.dataTransfer) {
-                      e.dataTransfer.getFilesAndDirectories().then(function(filesAndDirs) {
-                          iterateFilesAndDirs(filesAndDirs, '/');
-                      });
                   }
-              });
-            </pre>
-            <dfn>DataTransfer.getFiles</dfn>
-            <p>When the <code>getFiles()</code> method is called, the user agent must run the steps below:</p>
-            <ol>
-            <li><p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a> representing the directory from which the user has made selections of files and directories and which the user has dragged and dropped. Set <var>d</var> to be the <a>present working directory</a>.</p></li>
-            <li><p>If the optional <a><code>recursiveFlag</code></a> parameter is set to <code>true</code>, then <a>return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>true</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
-       <li><p>Otherwise the <a><code>recursiveFlag</code></a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
-            </ol> 
+              };
+
+              // begin by traversing the chosen files and directories
+              if ('getFilesAndDirectories' in e.dataTransfer) {
+                  e.dataTransfer.getFilesAndDirectories().then(function(filesAndDirs) {
+                      iterateFilesAndDirs(filesAndDirs, '/');
+                  });
+              }
+          });
+        </pre>
+        <dfn>DataTransfer.getFiles</dfn>
+        <p>When the <code>getFiles()</code> method is called, the user agent must run the steps below:</p>
+        <ol>
+          <li><p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a> representing the directory from which the user has made selections of files and directories and which the user has dragged and dropped. Set <var>d</var> to be the <a>present working directory</a>.</p></li>
+          <li><p>If the optional <a><code>recursiveFlag</code></a> parameter is set to <code>true</code>, then <a>return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>true</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
+          <li><p>Otherwise the <a><code>recursiveFlag</code></a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
+        </ol> 
       </section>
     </section>
     <section class="informative">
