@@ -109,11 +109,11 @@
             <p>Run the following steps asynchronously:</p>
             <ol>
               <li><p>If the <a>present working directory</a> has no <a data-lt="file-concept">files</a> or <a data-lt-noDefault data-lt="directory-concept">directories</a>, resolve <var>p</var> with <var>s</var>, which is still an empty sequence.</p></li>
-              <li><p>Otherwise, for each <a>immediate child</a> of the <a>present working directory</a>, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> or <a>Directory</a> object, depending on the type of the <a>immediate child</a>.</p></li>
+              <li><p>Otherwise, for each <a>immediate child</a> of the <a>present working directory</a>, <a>add a node</a> to <var>s</var> as a <a>File</a> or <a>Directory</a> object, depending on the type of the <a>immediate child</a>.</p></li>
               <li><p>If there are any problems retrieving any <a>immediate child</a>, reject <var>p</var> with an <code>InvalidStateError</code>.</p>
               <div class="note"><p>Promise rejection occurs for any problem crawling the <a>present working directory</a>.</p></div>  
               </li>
-              <li><p>Once all the <a>immediate child</a> nodes of the <a>present working directory</a> have been added to <var>s</var> as a <a><code>File</code></a> or <a><code>Directory</code></a>, resolve <var>p</var> with <var>s</var>.</p>
+              <li><p>Once all the <a>immediate child</a> nodes of the <a>present working directory</a> have been added to <var>s</var> as a <a>File</a> or <a>Directory</a>, resolve <var>p</var> with <var>s</var>.</p>
               </li>
             </ol>
           </li>
@@ -123,7 +123,7 @@
       </section>
       <section>
         <h3>Returning A Flattened File List</h3>
-        <p>It is often convenient to simply return a flattened list of files from within the <a>temporary directory tree</a>. These can be from within the <a>present working directory</a> alone &ndash; that is, only every <a>immediate child</a> of the <a>present working directory</a> that is a <a><code>File</code></a> &ndash; or from the entirety of the tree, including subdirectories. This can be configured via the <dfn>recursive flag</dfn> which can be set to <code>true</code>; if <code>true</code> user agents must recurse through the entire <a>temporary directory tree</a> and return all the files.</p>
+        <p>It is often convenient to simply return a flattened list of files from within the <a>temporary directory tree</a>. These can be from within the <a>present working directory</a> alone &ndash; that is, only every <a>immediate child</a> of the <a>present working directory</a> that is a <a>File</a> &ndash; or from the entirety of the tree, including subdirectories. This can be configured via the <dfn>recursive flag</dfn> which can be set to <code>true</code>; if <code>true</code> user agents must recurse through the entire <a>temporary directory tree</a> and return all the files.</p>
         <p>When this specification says to <dfn>return a flattened file sequence promise</dfn> on a given <a>present working directory</a>, the user agent must run the following steps:</p>
         <ol>
           <li><p>If the result of running <a href="https://w3c.github.io/webappsec-secure-contexts/#settings-object">is settings object a secure context</a> with the <a href="https://html.spec.whatwg.org/multipage/webappapis.html#incumbent-settings-object">incumbent settings object</a> is <code>Not Secure</code>, return a new promise rejected with a "<code>SecurityError</code>" exception.</p></li>
@@ -133,12 +133,12 @@
             <ol>
               <li><p>If the <a>recursive flag</a> is set to <code>true</code>, follow the substeps below:</p>
                 <ol>
-                  <li><p>For each <a>immediate child</a> of the <a>present working directory</a> that is also a file, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> object representing that file.</p></li>
-                  <li><p>Recurse through all <a>child</a> nodes that are subdirectories of the <a>present working directory</a>. If any of these contain files, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> object representing that file.</p></li>
+                  <li><p>For each <a>immediate child</a> of the <a>present working directory</a> that is also a file, <a>add a node</a> to <var>s</var> as a <a>File</a> object representing that file.</p></li>
+                  <li><p>Recurse through all <a>child</a> nodes that are subdirectories of the <a>present working directory</a>. If any of these contain files, <a>add a node</a> to <var>s</var> as a <a>File</a> object representing that file.</p></li>
                   <li><p>If there are problems retrieving any file or adding a node for that file, reject <var>p</var> with an <code>InvalidStateError</code>.</p></li>
                 </ol>
               </li>
-              <li><p>Otherwise, the <a>recursive flag</a> is set to <code>false</code>. For each <a>immediate child</a> of the <a>present working directory</a> that is a file, <a>add a node</a> to <var>s</var> as a <a><code>File</code></a> object representing that file. If there are problems retrieving any file or adding a node for that file, reject <var>p</var> with an <code>InvalidStateError</code>.</p></li>
+              <li><p>Otherwise, the <a>recursive flag</a> is set to <code>false</code>. For each <a>immediate child</a> of the <a>present working directory</a> that is a file, <a>add a node</a> to <var>s</var> as a <a>File</a> object representing that file. If there are problems retrieving any file or adding a node for that file, reject <var>p</var> with an <code>InvalidStateError</code>.</p></li>
               <li>
                 <p>Resolve <var>p</var> with <var>s</var>.</p>
                 <div class="note"><p>If no files are found, <var>p</var> is still resolved with <var>s</var> which is still an empty sequence.</p></div>
@@ -158,11 +158,11 @@
           <li><p>Return, but continue running these steps <dfn>in parallel</dfn> [[!HTML]].</p></li>
           <li><p>Optionally, wait until any prior execution of this algorithm has terminated.</p></li>
           <li>
-            <p>If the result of running <a href="https://w3c.github.io/webappsec-secure-contexts/#settings-object">is settings object a secure context</a> with the <a href="https://html.spec.whatwg.org/multipage/webappapis.html#incumbent-settings-object">incumbent settings object</a> is <code>Not Secure</code>, the user agent may prevent a directory picker from being shown at all. In this case, a user agent may run the steps for the File Upload state as if the <a data-lt-noDefault data-lt="directory-attribute"><code>directory</code></a> attribute is not set, and exit from this algorithm.</p>
+            <p>If the result of running <a href="https://w3c.github.io/webappsec-secure-contexts/#settings-object">is settings object a secure context</a> with the <a href="https://html.spec.whatwg.org/multipage/webappapis.html#incumbent-settings-object">incumbent settings object</a> is <code>Not Secure</code>, the user agent may prevent a directory picker from being shown at all. In this case, a user agent may run the steps for the File Upload state as if the <a>allowdirs</a> attribute is not set, and exit from this algorithm.</p>
             <div class="issue">It might be simpler to specify a Directory Upload state, alongside a File Upload state.</div>
           </li>
           <li>
-            <p>If the user agent is capable of surfacing both a directory picker and a file picker in a single user interface element, this user agent is said to have a <dfn>Single File and Directory Picker</dfn>. The <a><code>HTMLInputElement.isFilesAndDirectoriesSupported</code></a> attribute of the <a><code>HTMLInputElement</code></a> must be set to <code>true</code>.</p>
+            <p>If the user agent is capable of surfacing both a directory picker and a file picker in a single user interface element, this user agent is said to have a <dfn>Single File and Directory Picker</dfn>. The <a>HTMLInputElement.isFilesAndDirectoriesSupported</a> attribute of the <a>HTMLInputElement</a> must be set to <code>true</code>.</p>
             <p>User agents in practice may reuse user interface elements from the host OS. If the host OS supports a <a>Single File and Directory Picker</a> a file input with a single button that enables the combined picker may be rendered and may resemble the suggested user interface element below:</p>
             <figure>
               <div style="border: 1px solid #999; color: #444; font-size: 14px; width: 305px; height: 20px; line-height: 20px; padding: 5px 5px 5px 10px; text-align: left;">
@@ -174,7 +174,7 @@
             <div class="note"><p>Currently, only OSX exposes a unified picker.</p></div>
           </li>
           <li>
-            <p>If the user agent does not have a <a>Single File and Directory Picker</a> it is said to have <dfn>Distinct File and Directory Pickers</dfn>. This user agent must expose a value of <code>false</code> on the <a><code>HTMLInputElement.isFilesAndDirectoriesSupported</code></a> attribute of the <a><code>HTMLInputElement</code></a>.</p>
+            <p>If the user agent does not have a <a>Single File and Directory Picker</a> it is said to have <dfn>Distinct File and Directory Pickers</dfn>. This user agent must expose a value of <code>false</code> on the <a>HTMLInputElement.isFilesAndDirectoriesSupported</a> attribute of the <a>HTMLInputElement</a>.</p>
             <p>If the user agent has <a>Distinct File and Directory Pickers</a>, possibly reusing user interface elements from the host OS, a file input that enables two separate pickers (file and directory) via two different buttons may be rendered and may resemble the suggested user interface element below:</p>
             <figure>
               <div style="border: 1px solid #999; color: #444; font-size: 14px; padding: 5px; width: 310px; height: 20px; line-height: 20px;">
@@ -211,10 +211,10 @@
       <p>When an <code>input</code> element's type attribute is in the <dfn>File Upload</dfn> state, the rules in this section apply [[!HTML]].</p>
       <p>When the <code>input</code> element is in the <a>File Upload</a> state, it can represent two distinct types of user selections: 
         <ul>
-        <li><p>If the <a data-lt-noDefault data-lt="directory-attribute"><code>directory</code></a> content attribute is NOT set, it represents a list of <em>only</em> the selected files, each file consisting of a file name, a file type, and a file body (the contents of the file).</p></li>
-        <li><p>If the <a data-lt-noDefault data-lt="directory-attribute"><code>directory</code></a> attribute is set, it represents a sequence of <em>both</em> the selections of files and <a data-lt-noDefault data-lt="directory-concept">directories</a>.</li></p>
+        <li><p>If the <a>allowdirs</a> content attribute is NOT set, it represents a list of <em>only</em> the selected files, each file consisting of a file name, a file type, and a file body (the contents of the file).</p></li>
+        <li><p>If the <a>allowdirs</a> attribute is set, it represents a sequence of <em>both</em> the selections of files and <a data-lt-noDefault data-lt="directory-concept">directories</a>.</li></p>
       </ul>
-      <p>The <dfn data-lt-noDefault data-lt="directory-attribute"><code>directory</code></dfn> content attribute is a boolean attribute [[!HTML]] that indicates whether a user is allowed the selection of both <a data-lt="file-concept">files</a> and <a data-lt-noDefault data-lt="directory-concept">directories</a>; when set, a user agent that supports it must <a>trigger a directory picker</a>.</p>
+      <p>The <dfn><code>allowdirs</code></dfn> content attribute is a boolean attribute [[!HTML]] that indicates whether a user is allowed the selection of both <a data-lt="file-concept">files</a> and <a data-lt-noDefault data-lt="directory-concept">directories</a>; when set, a user agent that supports it must <a>trigger a directory picker</a>.</p>
     </section>
     <section>
       <h2>APIs</h2>
@@ -249,7 +249,7 @@
         <p>When the <code>getFiles()</code> method is called, the user agent must act as follows:</p>
         <ol>
           <li><p>If the optional <dfn><code>recursiveFlag</code></dfn> parameter is set to <code>true</code>, then <a>return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>true</code>, using this <a data-lt-noDefault data-lt="directory-concept">directory</a> as the <a>present working directory</a>.</p></li>
-          <li><p>Otherwise the <a><code>recursiveFlag</code></a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using this <a data-lt-noDefault data-lt="directory-concept">directory</a> as the <a>present working directory</a>.</p></li>
+          <li><p>Otherwise the <a>recursiveFlag</a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using this <a data-lt-noDefault data-lt="directory-concept">directory</a> as the <a>present working directory</a>.</p></li>
         </ol>
         <pre class="example highlight" title="JavaScript">
         directory.getFiles(true).then(images => Promise.all(files.map(uploadImage))
@@ -322,8 +322,8 @@
         <p>When the <code>getFiles()</code> method is called, the user agent must run the steps below:</p>
         <ol>
           <li><p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a> representing the directory from which the user has made selections of files and directories. Set <var>d</var> to be the <a>present working directory</a>.</p></li>
-          <li><p>If the optional <a><code>recursiveFlag</code></a> parameter is set to <code>true</code>, then <a>return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>true</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
-          <li><p>Otherwise the <a><code>recursiveFlag</code></a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
+          <li><p>If the optional <a>recursiveFlag</a> parameter is set to <code>true</code>, then <a>return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>true</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
+          <li><p>Otherwise the <a>recursiveFlag</a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
         </ol> 
 
         <dfn>HTMLInputElement.chooseDirectory</dfn>
@@ -410,9 +410,9 @@
         <p>When the <code>getFiles()</code> method is called, the user agent must run the steps below:</p>
         <ol>
           <li><p>Let <var>d</var> be the <a>immediate child</a> of the <a>root</a> of the <a>temporary directory tree</a> representing the directory from which the user has made selections of files and directories and which the user has dragged and dropped. Set <var>d</var> to be the <a>present working directory</a>.</p></li>
-          <li><p>If the optional <a><code>recursiveFlag</code></a> parameter is set to <code>true</code>, then <a>return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>true</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
-          <li><p>Otherwise the <a><code>recursiveFlag</code></a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
-        </ol> 
+          <li><p>If the optional <a>recursiveFlag</a> parameter is set to <code>true</code>, then <a>return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>true</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
+          <li><p>Otherwise the <a>recursiveFlag</a> parameter is set to <code>false</code> or is <em>undefined</em>. <a>Return a flattened file sequence promise</a> with the <a>recursive flag</a> set to <code>false</code>, using <var>d</var> as the <a>present working directory</a>.</p></li>
+        </ol>
       </section>
     </section>
     <section class="informative">
