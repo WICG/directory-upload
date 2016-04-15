@@ -68,11 +68,11 @@ pre.code {
 <p>To enable directory upload, certain new APIs are needed which are outlined in the <a href="proposal.html">directory upload spec proposal</a>. There are two ways we can upload files and directories: a file input with the &quot;directory&quot; attribute, or an element with a drop event listener. Below are examples of these methods in action using the new APIs (the polyfill only works in Chrome).</p>
 
 <h2>1. File Input</h2>
-<input type="file" id="fileInput" directory multiple />
+<input type="file" id="fileInput" allowdirs multiple />
 <div>
 <h4><a href="#" onclick="return toggleDisplay('code-fileinput');">Code Example</a></h4>
 <pre class="code" id="code-fileinput">
-&lt;input type="file" id="fileInput" directory multiple />
+&lt;input type="file" id="fileInput" allowdirs multiple />
 
 &lt;script type="text/javascript">
 document.addEventListener('DOMContentLoaded', function(event) {

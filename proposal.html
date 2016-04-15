@@ -262,23 +262,23 @@
         <p>More information about the <code>HTMLInputElement</code> interface can be found in the <a href="http://www.w3.org/html/wg/drafts/html/CR/forms.html#the-input-element">HTML5 spec</a>.</p>
         <pre class="idl">
           partial interface HTMLInputElement {
-                          attribute boolean directory;
+                          attribute boolean allowdirs;
               readonly    attribute boolean isFilesAndDirectoriesSupported;
               Promise&lt;sequence&lt;(File or Directory)&gt;&gt;getFilesAndDirectories();
               Promise&lt;sequence&lt;(File)&gt;&gt;getFiles(optional boolean <a>recursiveFlag</a>=false);
               void chooseDirectory();
           };
         </pre>
-        <dfn>HTMLInputElement.directory</dfn>
-        <p>On getting, the <a>HTMLInputElement.directory</a> IDL attribute must <dfn>reflect</dfn> the content <code>directory</code> attribute, and is <code>true</code> if the content <code>directory</code> attribute is set, and <code>false</code> otherwise.</p>
-        <div class="note">Adding the <code>multiple</code> attribute does not change the behavior, however, it allows older browsers to make the file input accept multiple files instead of just one since they would not recognize the <a>HTMLInputElement.directory</a> attribute.</div>
+        <dfn>HTMLInputElement.allowdirs</dfn>
+        <p>On getting, the <a>HTMLInputElement.allowdirs</a> IDL attribute must <dfn>reflect</dfn> the content <code>allowdirs</code> attribute, and is <code>true</code> if the content <code>allowdirs</code> attribute is set, and <code>false</code> otherwise.</p>
+        <div class="note">Adding the <code>multiple</code> attribute does not change the behavior, however, it allows older browsers to make the file input accept multiple files instead of just one since they would not recognize the <a>HTMLInputElement.allowdirs</a> attribute.</div>
         <p>If this attribute is set, <code>input.files</code> MUST return <code>null</code>.</p>
         <div class="note">Due to this, <a>HTMLInputElement.getFilesAndDirectories</a> must be called to retrieve the chosen files and directories.</div>
         <pre class="example highlight" title="HTML">
-          &lt;input type="file" id="fileInput" directory multiple />
+          &lt;input type="file" id="fileInput" allowdirs multiple />
             &lt;!-- Supports being able to select multiple files and/or directories -->
             &lt;!-- Adding the multiple attribute is useful because older browsers would still be able -->
-            &lt;!-- to accept multiple files even though they do not recognize the directory attribute -->
+            &lt;!-- to accept multiple files even though they do not recognize the allowdirs attribute -->
         </pre>
           
         <p>The default click behavior of such a file input MUST trigger the file picker. Calling <a>HTMLInputElement.chooseDirectory</a> on the file input element MUST trigger the directory picker.</p>
@@ -331,7 +331,7 @@
 
         <section>
           <h2>Form Submission</h2>
-          <p>When a form is submitted with <code class="highlight">enctype="multipart/form-data"</code> and a file input with the <a>HTMLInputElement.directory</a> attribute (and a directory named &quot;docs&quot; was picked) it MUST adhere to the following pattern in its request payload:</p>
+          <p>When a form is submitted with <code class="highlight">enctype="multipart/form-data"</code> and a file input with the <a>HTMLInputElement.allowdirs</a> attribute (and a directory named &quot;docs&quot; was picked) it MUST adhere to the following pattern in its request payload:</p>
           <div class="issue">TODO: generate form submission output from <a>temporary directory tree</a>.</div>
           <pre class="example highlight">
             ------Boundary
