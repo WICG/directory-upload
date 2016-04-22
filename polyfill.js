@@ -64,17 +64,24 @@
 				return Promise.all(promises);
 			} else {
 				return new Promise(function(resolve, reject) {
-					that._items.createReader().readEntries(function(entries) {
-						var promises = [];
+					var dirReader = that._items.createReader();
+					var promises = [];
 
-						for (var i = 0; i < entries.length; i++) {
-							var entry = entries[i];
+					var readEntries = function() {
+						dirReader.readEntries(function(entries) {
+							if (!entries.length) {
+								resolve(Promise.all(promises));
+							} else {
+								for (var i = 0; i < entries.length; i++) {
+									promises.push(getItem(entries[i]));
+								}
 
-							promises.push(getItem(entry));
-						}
-						
-						resolve(Promise.all(promises));
-					}, reject);
+								readEntries();
+							}
+						}, reject);
+					};
+
+					readEntries();
 				});
 			}
 		// from file input manual selection
